@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -28,10 +27,17 @@ const Landing = () => {
           password,
         });
         if (error) throw error;
+        
         toast({
           title: "Inscription réussie",
           description: "Votre compte a été créé avec succès.",
         });
+        const { error: loginError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (loginError) throw loginError;
+        navigate("/dashboard");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -54,7 +60,6 @@ const Landing = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#0e3175]/5 via-white to-[#0e3175]/5">
-      {/* Navigation */}
       <nav className="border-b bg-white/50 backdrop-blur-sm sticky top-0 z-50 animate-fade-in">
         <div className="mx-auto px-4 sm:px-6 max-w-screen-2xl">
           <div className="flex items-center justify-between h-16">
@@ -81,7 +86,6 @@ const Landing = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
       <div className="flex-1 flex items-center">
         <div className="w-full">
           <div className="mx-auto px-4 sm:px-6 max-w-screen-2xl">
@@ -127,7 +131,6 @@ const Landing = () => {
                 </div>
               </div>
 
-              {/* Login/Signup Form */}
               <div className="flex justify-center lg:justify-end">
                 <Card className="p-6 shadow-2xl bg-white border-0 rounded-2xl transform hover:scale-[1.01] transition-all duration-300 animate-fade-in [animation-delay:400ms] w-full max-w-md">
                   <div className="mb-6">
@@ -150,6 +153,7 @@ const Landing = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="contact@entreprise.fr"
+                        required
                         className="h-10 px-4 bg-white text-sm focus:ring-2 focus:ring-[#0e3175] focus:ring-offset-0"
                       />
                     </div>
@@ -161,6 +165,8 @@ const Landing = () => {
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={6}
                         className="h-10 px-4 bg-white text-sm focus:ring-2 focus:ring-[#0e3175] focus:ring-offset-0"
                       />
                     </div>

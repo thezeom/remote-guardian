@@ -1,10 +1,8 @@
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getSites } from "@/lib/api";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Site } from "@/types/database";
 import { ArrowLeft } from "lucide-react";
@@ -17,31 +15,18 @@ const DetectedSites = () => {
   const { data: sites = [], isLoading } = useQuery({
     queryKey: ['pending-sites'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('sites')
-        .select('*')
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as Site[];
+      // Simulation de données locales
+      return [] as Site[];
     },
   });
 
   const handleAssignSite = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('sites')
-        .update({ status: 'online' })
-        .eq('id', id);
-      
-      if (error) throw error;
-
+      // Simulation d'assignation locale
       toast({
         title: "Succès",
         description: "Le site a été assigné avec succès.",
       });
-      
       queryClient.invalidateQueries({ queryKey: ['pending-sites'] });
       queryClient.invalidateQueries({ queryKey: ['sites'] });
     } catch (error: any) {

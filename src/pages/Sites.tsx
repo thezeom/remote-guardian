@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,8 +7,7 @@ import { Link } from "react-router-dom";
 import { PlusCircle, RefreshCcw, ArrowRight, Trash2Icon, Search, Filter, UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getSites, createSite, updateSite, deleteSite } from "@/lib/api";
-import { supabase } from "@/integrations/supabase/client";
+import { getSites, createSite, deleteSite } from "@/lib/api";
 import { Site } from "@/types/database";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/AuthProvider";
@@ -125,13 +123,7 @@ const Sites = () => {
 
   const handleAssociateSite = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('sites')
-        .update({ status: 'online' })
-        .eq('id', id);
-      
-      if (error) throw error;
-
+      // Simulation d'assignation locale
       toast({
         title: "Succès",
         description: "Le site a été associé avec succès.",

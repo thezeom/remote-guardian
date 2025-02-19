@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, Lock, Wifi } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const Landing = () => {
@@ -21,36 +20,17 @@ const Landing = () => {
     setIsLoading(true);
 
     try {
-      if (!isLogin) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) throw error;
-        
-        toast({
-          title: "Inscription réussie",
-          description: "Votre compte a été créé avec succès.",
-        });
-        const { error: loginError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (loginError) throw loginError;
-        navigate("/dashboard");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        navigate("/dashboard");
-      }
+      // Simulation d'authentification locale
+      localStorage.setItem('token', 'mock-token');
+      toast({
+        title: isLogin ? "Connexion réussie" : "Inscription réussie",
+        description: "Bienvenue !",
+      });
+      navigate("/dashboard");
     } catch (error: any) {
-      console.error("Erreur d'authentification:", error);
       toast({
         title: "Erreur",
-        description: error.message,
+        description: "Une erreur est survenue",
         variant: "destructive",
       });
     } finally {

@@ -57,24 +57,38 @@ export const deleteSite = async (id: string) => {
 };
 
 export const getSiteStats = async (siteId: string) => {
-  const equipmentStats = await supabase
+  // Pour les équipements, comptons manuellement chaque statut
+  const equipmentResponse = await supabase
     .from('equipment')
-    .select('status', { count: 'exact' })
-    .eq('site_id', siteId)
-    .group_by('status');
+    .select('status')
+    .eq('site_id', siteId);
 
-  const alertStats = await supabase
+  const alertResponse = await supabase
     .from('alerts')
-    .select('type,status', { count: 'exact' })
-    .eq('equipment.site_id', siteId)
-    .group_by('type,status');
+    .select('type, status')
+    .eq('equipment.site_id', siteId);
 
-  if (equipmentStats.error) throw equipmentStats.error;
-  if (alertStats.error) throw alertStats.error;
+  if (equipmentResponse.error) throw equipmentResponse.error;
+  if (alertResponse.error) throw alertResponse.error;
+
+  // Calculer les statistiques des équipements
+  const equipmentStats = equipmentResponse.data.reduce((acc: Record<string, number>, curr) => {
+    acc[curr.status] = (acc[curr.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Calculer les statistiques des alertes
+  const alertStats = alertResponse.data.reduce((acc: Record<string, Record<string, number>>, curr) => {
+    if (!acc[curr.type]) {
+      acc[curr.type] = {};
+    }
+    acc[curr.type][curr.status] = (acc[curr.type][curr.status] || 0) + 1;
+    return acc;
+  }, {});
 
   return {
-    equipment: equipmentStats.data,
-    alerts: alertStats.data
+    equipment: equipmentStats,
+    alerts: alertStats
   };
 };
 

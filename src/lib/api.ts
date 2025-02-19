@@ -13,6 +13,17 @@ export const getSites = async () => {
   return data as Site[];
 };
 
+export const getSiteById = async (id: string) => {
+  const { data, error } = await supabase
+    .from('sites')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) throw error;
+  return data as Site;
+};
+
 export const createSite = async (site: Omit<Site, 'id' | 'created_at' | 'updated_at'>) => {
   const { data, error } = await supabase
     .from('sites')
@@ -45,11 +56,55 @@ export const deleteSite = async (id: string) => {
   if (error) throw error;
 };
 
+export const getSiteStats = async (siteId: string) => {
+  const equipmentStats = await supabase
+    .from('equipment')
+    .select('status', { count: 'exact' })
+    .eq('site_id', siteId)
+    .group_by('status');
+
+  const alertStats = await supabase
+    .from('alerts')
+    .select('type,status', { count: 'exact' })
+    .eq('equipment.site_id', siteId)
+    .group_by('type,status');
+
+  if (equipmentStats.error) throw equipmentStats.error;
+  if (alertStats.error) throw alertStats.error;
+
+  return {
+    equipment: equipmentStats.data,
+    alerts: alertStats.data
+  };
+};
+
 // Equipment
 export const getEquipment = async () => {
   const { data, error } = await supabase
     .from('equipment')
     .select('*')
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return data as Equipment[];
+};
+
+export const getEquipmentByType = async (type: Equipment['type']) => {
+  const { data, error } = await supabase
+    .from('equipment')
+    .select('*')
+    .eq('type', type)
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return data as Equipment[];
+};
+
+export const getEquipmentByStatus = async (status: Equipment['status']) => {
+  const { data, error } = await supabase
+    .from('equipment')
+    .select('*')
+    .eq('status', status)
     .order('created_at', { ascending: false });
   
   if (error) throw error;
@@ -110,6 +165,15 @@ export const deleteEquipment = async (id: string) => {
   if (error) throw error;
 };
 
+export const bulkUpdateEquipment = async (ids: string[], updates: Partial<Equipment>) => {
+  const { error } = await supabase
+    .from('equipment')
+    .update(updates)
+    .in('id', ids);
+  
+  if (error) throw error;
+};
+
 // Alerts
 export const getAlerts = async () => {
   const { data, error } = await supabase
@@ -121,11 +185,55 @@ export const getAlerts = async () => {
   return data as Alert[];
 };
 
+export const getActiveAlerts = async () => {
+  const { data, error } = await supabase
+    .from('alerts')
+    .select('*')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return data as Alert[];
+};
+
+export const getAlertsByType = async (type: Alert['type']) => {
+  const { data, error } = await supabase
+    .from('alerts')
+    .select('*')
+    .eq('type', type)
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return data as Alert[];
+};
+
+export const getAlertsByStatus = async (status: Alert['status']) => {
+  const { data, error } = await supabase
+    .from('alerts')
+    .select('*')
+    .eq('status', status)
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return data as Alert[];
+};
+
 export const getAlertsByEquipment = async (equipmentId: string) => {
   const { data, error } = await supabase
     .from('alerts')
     .select('*')
     .eq('equipment_id', equipmentId)
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return data as Alert[];
+};
+
+export const getAlertsBySite = async (siteId: string) => {
+  const { data, error } = await supabase
+    .from('alerts')
+    .select('*')
+    .eq('equipment.site_id', siteId)
     .order('created_at', { ascending: false });
   
   if (error) throw error;
@@ -160,6 +268,15 @@ export const deleteAlert = async (id: string) => {
     .from('alerts')
     .delete()
     .eq('id', id);
+  
+  if (error) throw error;
+};
+
+export const bulkUpdateAlerts = async (ids: string[], updates: Partial<Alert>) => {
+  const { error } = await supabase
+    .from('alerts')
+    .update(updates)
+    .in('id', ids);
   
   if (error) throw error;
 };

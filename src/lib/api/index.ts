@@ -4,6 +4,8 @@
  * Configuration et exports des fonctions API
  */
 
+import { Site, Equipment } from "@/types/api";
+
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 // Configuration de base pour fetch
@@ -67,10 +69,37 @@ export const getEquipmentBySite = async (siteId: string) => {
   return await response.json();
 };
 
+export const createEquipment = async (equipment: Omit<Equipment, "id" | "created_at" | "updated_at">) => {
+  const response = await fetch(`${API_URL}/equipment`, {
+    ...fetchConfig,
+    method: 'POST',
+    body: JSON.stringify(equipment),
+  });
+  if (!response.ok) throw new Error('Failed to create equipment');
+  return await response.json();
+};
+
+export const updateEquipment = async (id: string, equipment: Partial<Equipment>) => {
+  const response = await fetch(`${API_URL}/equipment/${id}`, {
+    ...fetchConfig,
+    method: 'PUT',
+    body: JSON.stringify(equipment),
+  });
+  if (!response.ok) throw new Error('Failed to update equipment');
+  return await response.json();
+};
+
+export const deleteEquipment = async (id: string) => {
+  const response = await fetch(`${API_URL}/equipment/${id}`, {
+    ...fetchConfig,
+    method: 'DELETE',
+  });
+  if (!response.ok) throw new Error('Failed to delete equipment');
+};
+
 // Fonctions API pour les alertes
 export const getAlerts = async () => {
   const response = await fetch(`${API_URL}/alerts`, fetchConfig);
   if (!response.ok) throw new Error('Failed to fetch alerts');
   return await response.json();
 };
-

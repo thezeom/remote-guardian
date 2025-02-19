@@ -54,12 +54,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Protection des routes
   useEffect(() => {
     if (!isLoading) {
-      const isRootRoute = location.pathname === '/';
+      const publicPaths = ['/', '/landing'];
+      const isPublicRoute = publicPaths.includes(location.pathname);
       
-      if (user && isRootRoute) {
-        console.log("Authenticated user on root route, redirecting to dashboard");
+      if (user && isPublicRoute) {
+        console.log("Authenticated user on public route, redirecting to dashboard");
         navigate('/dashboard');
-      } else if (!user && !isRootRoute) {
+      } else if (!user && !isPublicRoute) {
         console.log("Unauthenticated user on protected route, redirecting to root");
         navigate('/');
       }

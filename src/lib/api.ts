@@ -57,39 +57,51 @@ export const deleteSite = async (id: string) => {
 };
 
 export const getSiteStats = async (siteId: string) => {
-  // Pour les équipements, comptons manuellement chaque statut
-  const equipmentResponse = await supabase
-    .from('equipment')
-    .select('status')
-    .eq('site_id', siteId);
+  try {
+    // Pour les équipements
+    const { data: equipmentData, error: equipmentError } = await supabase
+      .from('equipment')
+      .select('status')
+      .eq('site_id', siteId);
 
-  const alertResponse = await supabase
-    .from('alerts')
-    .select('type, status')
-    .eq('equipment.site_id', siteId);
+    if (equipmentError) throw equipmentError;
 
-  if (equipmentResponse.error) throw equipmentResponse.error;
-  if (alertResponse.error) throw alertResponse.error;
+    // Pour les alertes
+    const { data: alertData, error: alertError } = await supabase
+      .from('alerts')
+      .select('type, status')
+      .eq('equipment.site_id', siteId);
 
-  // Calculer les statistiques des équipements
-  const equipmentStats = equipmentResponse.data.reduce((acc: Record<string, number>, curr) => {
-    acc[curr.status] = (acc[curr.status] || 0) + 1;
-    return acc;
-  }, {});
+    if (alertError) throw alertError;
 
-  // Calculer les statistiques des alertes
-  const alertStats = alertResponse.data.reduce((acc: Record<string, Record<string, number>>, curr) => {
-    if (!acc[curr.type]) {
-      acc[curr.type] = {};
-    }
-    acc[curr.type][curr.status] = (acc[curr.type][curr.status] || 0) + 1;
-    return acc;
-  }, {});
+    // Transformer les données d'équipement
+    const equipmentStats = equipmentData.reduce((acc: { [key: string]: number }, item) => {
+      const status = item.status || 'unknown';
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
 
-  return {
-    equipment: equipmentStats,
-    alerts: alertStats
-  };
+    // Transformer les données d'alerte
+    const alertStats = alertData.reduce((acc: { [key: string]: { [key: string]: number } }, item) => {
+      const type = item.type || 'unknown';
+      const status = item.status || 'unknown';
+      
+      if (!acc[type]) {
+        acc[type] = {};
+      }
+      
+      acc[type][status] = (acc[type][status] || 0) + 1;
+      return acc;
+    }, {});
+
+    return {
+      equipment: equipmentStats,
+      alerts: alertStats
+    };
+  } catch (error) {
+    console.error('Error in getSiteStats:', error);
+    throw error;
+  }
 };
 
 // Equipment

@@ -1,7 +1,7 @@
 
-const os = require('os');
-const { exec } = require('child_process');
-const fs = require('fs').promises;
+import os from 'os';
+import { exec } from 'child_process';
+import { promises as fs } from 'fs';
 
 class NetworkAgent {
   constructor() {

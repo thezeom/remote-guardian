@@ -13,6 +13,38 @@ export const getSites = async () => {
   return data as Site[];
 };
 
+export const createSite = async (site: Omit<Site, 'id' | 'created_at' | 'updated_at'>) => {
+  const { data, error } = await supabase
+    .from('sites')
+    .insert([site])
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data as Site;
+};
+
+export const updateSite = async (id: string, site: Partial<Site>) => {
+  const { data, error } = await supabase
+    .from('sites')
+    .update(site)
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data as Site;
+};
+
+export const deleteSite = async (id: string) => {
+  const { error } = await supabase
+    .from('sites')
+    .delete()
+    .eq('id', id);
+  
+  if (error) throw error;
+};
+
 // Equipment
 export const getEquipment = async () => {
   const { data, error } = await supabase

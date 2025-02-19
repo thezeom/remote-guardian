@@ -7,15 +7,27 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PlusCircle, RefreshCcw, ArrowRight, Trash2Icon, Search, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { getSites } from "@/lib/api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getSites, createSite, updateSite, deleteSite } from "@/lib/api";
 import { Site } from "@/types/database";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 const Sites = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [isNewSiteDialogOpen, setIsNewSiteDialogOpen] = useState(false);
+  const [newSiteName, setNewSiteName] = useState("");
+  const [newSiteAddress, setNewSiteAddress] = useState("");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: sites = [], isLoading, refetch } = useQuery({
     queryKey: ['sites'],
@@ -31,6 +43,71 @@ const Sites = () => {
       },
     },
   });
+
+  const createSiteMutation = useMutation({
+    mutationFn: createSite,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
+      toast({
+        title: "Succès",
+        description: "Le site a été créé avec succès.",
+      });
+      setIsNewSiteDialogOpen(false);
+      setNewSiteName("");
+      setNewSiteAddress("");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer le site. Veuillez réessayer.",
+        variant: "destructive",
+      });
+      console.error("Error creating site:", error);
+    },
+  });
+
+  const deleteSiteMutation = useMutation({
+    mutationFn: deleteSite,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
+      toast({
+        title: "Succès",
+        description: "Le site a été supprimé avec succès.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le site. Veuillez réessayer.",
+        variant: "destructive",
+      });
+      console.error("Error deleting site:", error);
+    },
+  });
+
+  const handleCreateSite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSiteName || !newSiteAddress) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createSiteMutation.mutate({
+      name: newSiteName,
+      address: newSiteAddress,
+      status: 'online'
+    });
+  };
+
+  const handleDeleteSite = async (id: string) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce site ?")) {
+      deleteSiteMutation.mutate(id);
+    }
+  };
 
   const filteredSites = sites.filter(site => {
     const matchesSearch = site.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -48,10 +125,54 @@ const Sites = () => {
             Gestion et surveillance des sites
           </p>
         </div>
-        <Button className="bg-[#0e3175] hover:bg-[#0e3175]/90">
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Nouveau site
-        </Button>
+        <Dialog open={isNewSiteDialogOpen} onOpenChange={setIsNewSiteDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-[#0e3175] hover:bg-[#0e3175]/90">
+              <PlusCircle className="w-4 h-4 mr-2" />
+              Nouveau site
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Ajouter un nouveau site</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleCreateSite} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nom du site</Label>
+                <Input
+                  id="name"
+                  value={newSiteName}
+                  onChange={(e) => setNewSiteName(e.target.value)}
+                  placeholder="Entrez le nom du site"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="address">Adresse</Label>
+                <Input
+                  id="address"
+                  value={newSiteAddress}
+                  onChange={(e) => setNewSiteAddress(e.target.value)}
+                  placeholder="Entrez l'adresse du site"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsNewSiteDialogOpen(false)}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createSiteMutation.isPending}
+                >
+                  {createSiteMutation.isPending ? "Création..." : "Créer"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="flex items-center gap-4">
@@ -116,10 +237,10 @@ const Sites = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className={cn(
-                    "status-badge",
-                    site.status === 'online' && "status-online",
-                    site.status === 'offline' && "status-offline",
-                    site.status === 'warning' && "status-warning"
+                    "px-2 py-1 rounded-full text-xs font-medium",
+                    site.status === 'online' && "bg-green-100 text-green-800",
+                    site.status === 'offline' && "bg-red-100 text-red-800",
+                    site.status === 'warning' && "bg-yellow-100 text-yellow-800"
                   )}>
                     {site.status === 'online' && "En ligne"}
                     {site.status === 'offline' && "Hors ligne"}
@@ -131,7 +252,13 @@ const Sites = () => {
                         <ArrowRight className="w-4 h-4" />
                       </Button>
                     </Link>
-                    <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-500 hover:text-red-600"
+                      onClick={() => handleDeleteSite(site.id)}
+                      disabled={deleteSiteMutation.isPending}
+                    >
                       <Trash2Icon className="w-4 h-4" />
                     </Button>
                   </div>

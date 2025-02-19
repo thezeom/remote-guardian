@@ -35,9 +35,11 @@ const App = () => (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Routes publiques */}
+          {/* Route publique pour la page d'accueil */}
           <Route path="/" element={<Landing />} />
-          <Route path="/demo/*" element={<DemoLayout />}>
+
+          {/* Route de démo pour les développeurs backend */}
+          <Route path="demo" element={<DemoLayout />}>
             <Route path="dashboard" element={<Index />} />
             <Route path="sites" element={<Sites />} />
             <Route path="sites/detected" element={<DetectedSites />} />
@@ -49,8 +51,8 @@ const App = () => (
             <Route path="compte" element={<Account />} />
           </Route>
           
-          {/* Routes protégées avec Layout */}
-          <Route path="/" element={
+          {/* Routes protégées pour l'application principale */}
+          <Route element={
             <ProtectedRoute>
               <Layout />
             </ProtectedRoute>
@@ -64,8 +66,10 @@ const App = () => (
             <Route path="alertes" element={<Alerts />} />
             <Route path="configuration" element={<Settings />} />
             <Route path="compte" element={<Account />} />
-            <Route path="*" element={<NotFound />} />
           </Route>
+
+          {/* Route pour gérer les URLs non trouvées */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
       <Toaster />

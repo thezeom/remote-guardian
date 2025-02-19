@@ -11,6 +11,7 @@ import { getSites, createSite, updateSite, deleteSite } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { Site } from "@/types/database";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +38,7 @@ const Sites = () => {
   const [newSiteAddress, setNewSiteAddress] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { logout } = useAuth();
 
   const { data: sites = [], isLoading, refetch } = useQuery({
     queryKey: ['sites'],
@@ -151,9 +153,22 @@ const Sites = () => {
     return matchesSearch && matchesStatus;
   });
 
-    const handleLogout = async () => {
-    localStorage.removeItem('token');
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      logout();
+      toast({
+        title: "Déconnexion réussie",
+        description: "À bientôt !",
+      });
+      navigate('/');
+    } catch (error: any) {
+      console.error("Erreur lors de la déconnexion:", error);
+      toast({
+        title: "Erreur",
+        description: "Un problème est survenu lors de la déconnexion.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -173,19 +188,15 @@ const Sites = () => {
             <PlusCircle className="w-4 h-4 mr-2" />
             Nouveau site
           </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <UserIcon className="w-5 h-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 focus:bg-red-50">
-                <LogOut className="mr-2 h-4 w-4" />
-                Se déconnecter
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <LogOut className="h-4 w-4" />
+            Se déconnecter
+          </Button>
         </div>
       </div>
 

@@ -8,4 +8,3 @@ export * from './client';
 export * from './sites';
 export * from './equipment';
 export * from './alerts';
-export * from './agents';

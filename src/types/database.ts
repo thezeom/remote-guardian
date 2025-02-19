@@ -48,32 +48,3 @@ export interface Alert {
   updated_at?: string;
 }
 
-/**
- * Représente un agent de surveillance
- */
-export interface Agent {
-  id: string;
-  site_id: string;
-  name: string;
-  version: string;
-  os: string;
-  status: 'online' | 'offline';
-  last_heartbeat: string;
-  created_at: string;
-  updated_at: string;
-}
-
-/**
- * Métriques système collectées par l'agent
- */
-export interface SystemMetrics {
-  agent_id: string;
-  timestamp: string;
-  cpu_usage: number;
-  memory_total: number;
-  memory_used: number;
-  disk_total: number;
-  disk_used: number;
-  network_in: number;
-  network_out: number;
-}

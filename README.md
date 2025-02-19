@@ -1,304 +1,126 @@
-# Documentation de l'API Frontend
+
+# Vigileos - Application de surveillance réseau
 
 ## Introduction
+Vigileos est une application web de surveillance réseau permettant de gérer et monitorer des sites clients et leurs équipements.
 
-Cette documentation détaille les endpoints API nécessaires pour le développement du backend de l'application de surveillance réseau. L'application permet de gérer des sites, des équipements réseau et des alertes.
+## Architecture Technique
 
-## Authentification
+### Frontend
+- React 18.3
+- TypeScript
+- Vite
+- TailwindCSS
+- Shadcn/UI pour les composants
+- React Query pour la gestion des états et des requêtes API
+- React Router pour la navigation
 
-### Format du Token
+### API Requise
+L'application nécessite une API REST avec les endpoints suivants :
+
+#### Authentification
+- `POST /api/auth/login` : Connexion utilisateur
+- `POST /api/auth/register` : Inscription utilisateur
+- `POST /api/auth/logout` : Déconnexion
+
+#### Sites
+- `GET /api/sites` : Liste des sites
+- `GET /api/sites/:id` : Détails d'un site
+- `POST /api/sites` : Création d'un site
+- `PUT /api/sites/:id` : Mise à jour d'un site
+- `DELETE /api/sites/:id` : Suppression d'un site
+
+#### Équipements
+- `GET /api/equipment` : Liste des équipements
+- `GET /api/sites/:siteId/equipment` : Équipements d'un site
+- `POST /api/equipment` : Création d'un équipement
+- `PUT /api/equipment/:id` : Mise à jour d'un équipement
+- `DELETE /api/equipment/:id` : Suppression d'un équipement
+- `GET /api/equipment/:id` : Détails d'un équipement
+
+#### Alertes
+- `GET /api/alerts` : Liste des alertes
+- `GET /api/equipment/:equipmentId/alerts` : Alertes d'un équipement
+- `POST /api/alerts` : Création d'une alerte
+- `PUT /api/alerts/:id` : Mise à jour d'une alerte
+
+### Types de données
+
+Les types de données sont définis dans `src/types/api.ts`. Ils incluent :
+- `Site` : Informations sur un site client
+- `Equipment` : Informations sur un équipement
+- `Alert` : Informations sur une alerte
+- `SystemMetrics` : Métriques système pour la surveillance
+
+### Authentification
+L'application utilise une authentification par token JWT. Le token est stocké dans le localStorage et doit être inclus dans les headers des requêtes API :
 ```
-Authorization: Bearer <jwt_token>
-```
-
-Le token JWT doit contenir :
-- `sub`: ID de l'utilisateur
-- `exp`: Timestamp d'expiration
-- `role`: Rôle de l'utilisateur
-
-### Rafraîchissement du Token
-Le token a une durée de validité de 24h. Un endpoint de rafraîchissement est nécessaire :
-```
-POST /api/auth/refresh
-Authorization: Bearer <refresh_token>
-```
-
-## Structure des données
-
-### Sites
-```typescript
-interface Site {
-  id: string;
-  name: string;
-  address: string;
-  city?: string;
-  postal_code?: string;
-  status: 'online' | 'offline' | 'warning' | 'pending';
-  created_at: string; // ISO 8601
-  updated_at: string; // ISO 8601
-}
-```
-
-### Équipements
-```typescript
-interface Equipment {
-  id: string;
-  site_id: string;
-  name: string;
-  type: 'camera' | 'video-recorder' | 'switch' | 'server' | 'access_point' | 'router' | 'other';
-  status: 'online' | 'offline' | 'maintenance';
-  ip_address: string | null;
-  last_maintenance: string | null; // ISO 8601
-  created_at: string; // ISO 8601
-  updated_at: string; // ISO 8601
-}
-```
-
-### Alertes
-```typescript
-interface Alert {
-  id: string;
-  equipment_id: string;
-  type: 'error' | 'warning' | 'info';
-  title: string;
-  message: string;
-  description?: string;
-  status: 'active' | 'resolved' | 'acknowledged';
-  created_at: string; // ISO 8601
-  resolved_at: string | null; // ISO 8601
-  updated_at?: string; // ISO 8601
-}
+Authorization: Bearer <token>
 ```
 
-### Format des Métriques Système
-```typescript
-interface SystemMetrics {
-  cpu_usage: number;      // Pourcentage (0-100)
-  memory_total: number;   // Bytes
-  memory_used: number;    // Bytes
-  disk_total: number;     // Bytes
-  disk_used: number;      // Bytes
-  network_in: number;     // Bytes/s
-  network_out: number;    // Bytes/s
-  timestamp: string;      // ISO 8601
-}
+## Installation et développement
+
+1. Installation des dépendances :
+```bash
+npm install
 ```
 
-## Endpoints API
-
-### Sites
-
-#### Liste des sites
-```
-GET /api/sites
-Query Parameters:
-  - page: number (default: 1)
-  - limit: number (default: 20)
-  - sort: string (ex: "name:asc", "status:desc")
-  - status: string[] (filtrer par status)
+2. Configuration des variables d'environnement :
+```bash
+VITE_API_URL=http://localhost:3000/api
 ```
 
-#### Récupérer un site
-```
-GET /api/sites/:id
-```
-
-#### Créer un site
-```
-POST /api/sites
-Protected: Requires authentication
+3. Lancement du serveur de développement :
+```bash
+npm run dev
 ```
 
-#### Mettre à jour un site
-```
-PUT /api/sites/:id
-Protected: Requires authentication
-```
+## Build et déploiement
 
-#### Supprimer un site
-```
-DELETE /api/sites/:id
-Protected: Requires authentication
+1. Construction de l'application :
+```bash
+npm run build
 ```
 
-#### Statistiques d'un site
-```
-GET /api/sites/:id/stats
-Response format:
-{
-  equipment: {
-    total: number;
-    online: number;
-    offline: number;
-    maintenance: number;
-    by_type: {
-      camera: number;
-      switch: number;
-      // etc...
-    }
-  },
-  alerts: {
-    total: number;
-    by_status: {
-      active: number;
-      resolved: number;
-      acknowledged: number;
-    },
-    by_type: {
-      error: number;
-      warning: number;
-      info: number;
-    }
-  }
-}
-```
+2. Les fichiers de production seront générés dans le dossier `dist`.
 
-### Équipements
+## Développement backend requis
 
-#### Liste des équipements
-```
-GET /api/equipment
-Query Parameters:
-  - page: number (default: 1)
-  - limit: number (default: 20)
-  - sort: string
-  - type: string[]
-  - status: string[]
-  - site_id: string
-```
+Pour implémenter le backend, vous devez :
 
-- `GET /api/equipment` - Liste tous les équipements
-- `GET /api/sites/:siteId/equipment` - Liste les équipements d'un site
-- `POST /api/equipment` - Crée un nouvel équipement
-- `PUT /api/equipment/:id` - Met à jour un équipement
-- `DELETE /api/equipment/:id` - Supprime un équipement
+1. Créer une API REST respectant les endpoints listés ci-dessus
+2. Implémenter l'authentification JWT
+3. Respecter les types de données définis dans `src/types/api.ts`
+4. Assurer la validation des données côté serveur
+5. Gérer les erreurs de manière appropriée avec des codes HTTP standards
 
-### Alertes
+### Format des réponses
 
-- `GET /api/alerts` - Liste toutes les alertes
-- `GET /api/equipment/:equipmentId/alerts` - Liste les alertes d'un équipement
-- `POST /api/alerts` - Crée une nouvelle alerte
-- `PUT /api/alerts/:id` - Met à jour une alerte
+Les réponses de l'API doivent suivre ce format :
 
-### Agents
-
-- `POST /api/agents` - Enregistre un nouvel agent
-- `POST /api/agents/:agentId/data` - Envoie des données depuis l'agent
-
-## Format des réponses
-
-Toutes les réponses doivent suivre ce format :
-
+Succès :
 ```json
 {
-  "data": {}, // Données de la réponse
-  "error": null // Message d'erreur si applicable
+  "data": { ... },
+  "message": "Success message"
 }
 ```
 
-## Gestion des erreurs
-
-Les erreurs doivent retourner un statut HTTP approprié et un message d'erreur :
-
+Erreur :
 ```json
 {
-  "data": null,
   "error": {
-    "message": "Description de l'erreur",
+    "message": "Error message",
     "code": "ERROR_CODE"
   }
 }
 ```
 
-## Authentification
+## Tests
 
-L'API utilise l'authentification Bearer Token. Chaque requête doit inclure un header :
-```
-Authorization: Bearer <token>
-```
+Pour les tests d'intégration, assurez-vous que :
+1. L'API respecte les types TypeScript définis
+2. Les réponses suivent le format attendu
+3. L'authentification fonctionne correctement
+4. Les erreurs sont gérées de manière appropriée
 
-## Exemples de requêtes
-
-### Création d'un site
-```bash
-POST /api/sites
-Content-Type: application/json
-Authorization: Bearer <token>
-
-{
-  "name": "Site Paris",
-  "address": "123 rue de Paris",
-  "city": "Paris",
-  "postal_code": "75001"
-}
-```
-
-### Mise à jour d'un équipement
-```bash
-PUT /api/equipment/123
-Content-Type: application/json
-Authorization: Bearer <token>
-
-{
-  "status": "maintenance",
-  "last_maintenance": "2024-03-14T12:00:00Z"
-}
-```
-
-## Websockets
-
-L'API doit supporter les WebSockets pour les mises à jour en temps réel :
-
-### Événements
-
-#### Connexion
-```
-ws://api-url/ws
-Headers:
-  Authorization: Bearer <token>
-```
-
-#### Types d'événements
-```typescript
-interface WebSocketEvent {
-  type: 'equipment_status' | 'new_alert' | 'alert_update' | 'site_status';
-  data: {
-    id: string;
-    // Données spécifiques à l'événement
-  };
-}
-```
-
-## Gestion des erreurs
-
-### Format des erreurs
-```typescript
-interface ApiError {
-  error: {
-    code: string;
-    message: string;
-    details?: unknown;
-  }
-}
-```
-
-### Codes d'erreur standards
-- `AUTH_REQUIRED`: Authentication requise
-- `AUTH_INVALID`: Token invalide
-- `NOT_FOUND`: Ressource non trouvée
-- `VALIDATION_ERROR`: Données invalides
-- `FORBIDDEN`: Action non autorisée
-- `INTERNAL_ERROR`: Erreur serveur
-
-## Notes pour le développement
-
-1. Tous les timestamps doivent être en UTC et au format ISO 8601
-2. Les IDs doivent être des UUIDs
-3. Implémenter la pagination pour les endpoints de liste
-4. Supporter le filtrage et le tri des résultats
-5. Mettre en place des logs détaillés pour le debugging
-6. Implémenter des mécanismes de rate limiting
-7. Supporter CORS pour le développement local
-8. Implémenter des healthchecks pour le monitoring
-9. Mettre en place des backups réguliers de la base de données
-10. Configurer un système de monitoring des performances

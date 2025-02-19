@@ -4,15 +4,16 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "./Sidebar";
 import { LogOut } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useAuth } from "./AuthProvider";
 
 const Layout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
 
   const getPageTitle = (pathname: string) => {
     switch (pathname) {
@@ -35,9 +36,7 @@ const Layout = () => {
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
+      logout();
       toast({
         title: "Déconnexion réussie",
         description: "À bientôt !",

@@ -43,9 +43,9 @@ const App = () => (
           {/* Page 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Toaster />
+        <Sonner />
       </AuthProvider>
-      <Toaster />
-      <Sonner />
     </BrowserRouter>
   </QueryClientProvider>
 );

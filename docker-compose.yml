@@ -2,10 +2,14 @@
 version: '3.8'
 
 services:
-  web:
+  agent:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "8080:80"
-    restart: unless-stopped
+    network_mode: "host"  # Permet à l'agent d'accéder directement au réseau de l'hôte
+    restart: always
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - SITE_ID=${SITE_ID:-default}
+      - API_URL=${API_URL:-https://api.example.com}

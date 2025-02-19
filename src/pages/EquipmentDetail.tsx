@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { EditEquipmentForm } from "@/components/equipment/EditEquipmentForm";
+import { Equipment } from "@/types/database";
 
 const EquipmentDetail = () => {
   const { id } = useParams();
@@ -60,28 +61,21 @@ const EquipmentDetail = () => {
       return;
     }
     
-    const baseUrl = equipment.ip;
+    const baseUrl = equipment.ip_address;
     const url = `http://${baseUrl}:${portToUse}`;
     window.open(url, '_blank');
   };
 
-  const equipment = {
-    id: 1,
+  const equipment: Equipment = {
+    id: "1",
+    site_id: "1",
     name: "Router-01",
     type: "router",
     status: "online",
-    ip: "192.168.1.1",
-    mac: "00:1A:2B:3C:4D:5E",
-    model: "Cisco 2900",
-    location: "Salle serveur principale",
-    uptime: "15 jours",
-    cpu: 45,
-    memory: 60,
-    temperature: 38,
-    interfaces: [
-      { name: "eth0", status: "up", speed: "1 Gbps" },
-      { name: "eth1", status: "up", speed: "1 Gbps" }
-    ]
+    ip_address: "192.168.1.1",
+    last_maintenance: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   };
 
   const availablePorts = [
@@ -219,9 +213,9 @@ const EquipmentDetail = () => {
             </div>
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Adresse IP</dt>
-              <dd className="font-medium">{equipment.ip}</dd>
+              <dd className="font-medium">{equipment.ip_address}</dd>
             </div>
-            <div className="flex justify-between">
+            {/* <div className="flex justify-between">
               <dt className="text-muted-foreground">Adresse MAC</dt>
               <dd className="font-medium">{equipment.mac}</dd>
             </div>
@@ -236,11 +230,11 @@ const EquipmentDetail = () => {
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Temps de fonctionnement</dt>
               <dd className="font-medium">{equipment.uptime}</dd>
-            </div>
+            </div> */}
           </dl>
         </Card>
 
-        <Card className="p-6">
+        {/* <Card className="p-6">
           <h2 className="text-lg font-semibold mb-4">Performances</h2>
           <div className="space-y-6">
             <div>
@@ -282,9 +276,9 @@ const EquipmentDetail = () => {
               </div>
             </div>
           </div>
-        </Card>
+        </Card> */}
 
-        <Card className="p-6 md:col-span-2">
+        {/* <Card className="p-6 md:col-span-2">
           <h2 className="text-lg font-semibold mb-4">Interfaces réseau</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -314,7 +308,7 @@ const EquipmentDetail = () => {
               </tbody>
             </table>
           </div>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );

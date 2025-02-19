@@ -19,7 +19,7 @@ interface EditEquipmentFormProps {
 
 export const EditEquipmentForm = ({ equipment, onClose }: EditEquipmentFormProps) => {
   const [name, setName] = useState(equipment.name);
-  const [type, setType] = useState(equipment.type);
+  const [type, setType] = useState<Equipment['type']>(equipment.type);
   const [ipAddress, setIpAddress] = useState(equipment.ip_address || "");
   const [isLoading, setIsLoading] = useState(false);
   
@@ -92,7 +92,7 @@ export const EditEquipmentForm = ({ equipment, onClose }: EditEquipmentFormProps
 
         <div className="space-y-2">
           <Label htmlFor="type">Type d'équipement</Label>
-          <Select value={type} onValueChange={setType} required>
+          <Select value={type} onValueChange={(value: Equipment['type']) => setType(value)} required>
             <SelectTrigger>
               <SelectValue placeholder="Sélectionnez un type" />
             </SelectTrigger>

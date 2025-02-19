@@ -1,9 +1,27 @@
-
 # Documentation de l'API Frontend
 
 ## Introduction
 
 Cette documentation détaille les endpoints API nécessaires pour le développement du backend de l'application de surveillance réseau. L'application permet de gérer des sites, des équipements réseau et des alertes.
+
+## Authentification
+
+### Format du Token
+```
+Authorization: Bearer <jwt_token>
+```
+
+Le token JWT doit contenir :
+- `sub`: ID de l'utilisateur
+- `exp`: Timestamp d'expiration
+- `role`: Rôle de l'utilisateur
+
+### Rafraîchissement du Token
+Le token a une durée de validité de 24h. Un endpoint de rafraîchissement est nécessaire :
+```
+POST /api/auth/refresh
+Authorization: Bearer <refresh_token>
+```
 
 ## Structure des données
 
@@ -16,8 +34,8 @@ interface Site {
   city?: string;
   postal_code?: string;
   status: 'online' | 'offline' | 'warning' | 'pending';
-  created_at: string;
-  updated_at: string;
+  created_at: string; // ISO 8601
+  updated_at: string; // ISO 8601
 }
 ```
 
@@ -30,9 +48,9 @@ interface Equipment {
   type: 'camera' | 'video-recorder' | 'switch' | 'server' | 'access_point' | 'router' | 'other';
   status: 'online' | 'offline' | 'maintenance';
   ip_address: string | null;
-  last_maintenance: string | null;
-  created_at: string;
-  updated_at: string;
+  last_maintenance: string | null; // ISO 8601
+  created_at: string; // ISO 8601
+  updated_at: string; // ISO 8601
 }
 ```
 
@@ -46,24 +64,108 @@ interface Alert {
   message: string;
   description?: string;
   status: 'active' | 'resolved' | 'acknowledged';
-  created_at: string;
-  resolved_at: string | null;
-  updated_at?: string;
+  created_at: string; // ISO 8601
+  resolved_at: string | null; // ISO 8601
+  updated_at?: string; // ISO 8601
 }
 ```
 
-## Endpoints API requis
+### Format des Métriques Système
+```typescript
+interface SystemMetrics {
+  cpu_usage: number;      // Pourcentage (0-100)
+  memory_total: number;   // Bytes
+  memory_used: number;    // Bytes
+  disk_total: number;     // Bytes
+  disk_used: number;      // Bytes
+  network_in: number;     // Bytes/s
+  network_out: number;    // Bytes/s
+  timestamp: string;      // ISO 8601
+}
+```
+
+## Endpoints API
 
 ### Sites
 
-- `GET /api/sites` - Liste tous les sites
-- `GET /api/sites/:id` - Récupère un site spécifique
-- `POST /api/sites` - Crée un nouveau site
-- `PUT /api/sites/:id` - Met à jour un site
-- `DELETE /api/sites/:id` - Supprime un site
-- `GET /api/sites/:id/stats` - Récupère les statistiques d'un site
+#### Liste des sites
+```
+GET /api/sites
+Query Parameters:
+  - page: number (default: 1)
+  - limit: number (default: 20)
+  - sort: string (ex: "name:asc", "status:desc")
+  - status: string[] (filtrer par status)
+```
+
+#### Récupérer un site
+```
+GET /api/sites/:id
+```
+
+#### Créer un site
+```
+POST /api/sites
+Protected: Requires authentication
+```
+
+#### Mettre à jour un site
+```
+PUT /api/sites/:id
+Protected: Requires authentication
+```
+
+#### Supprimer un site
+```
+DELETE /api/sites/:id
+Protected: Requires authentication
+```
+
+#### Statistiques d'un site
+```
+GET /api/sites/:id/stats
+Response format:
+{
+  equipment: {
+    total: number;
+    online: number;
+    offline: number;
+    maintenance: number;
+    by_type: {
+      camera: number;
+      switch: number;
+      // etc...
+    }
+  },
+  alerts: {
+    total: number;
+    by_status: {
+      active: number;
+      resolved: number;
+      acknowledged: number;
+    },
+    by_type: {
+      error: number;
+      warning: number;
+      info: number;
+    }
+  }
+}
+```
 
 ### Équipements
+
+#### Liste des équipements
+```
+GET /api/equipment
+Query Parameters:
+  - page: number (default: 1)
+  - limit: number (default: 20)
+  - sort: string
+  - type: string[]
+  - status: string[]
+  - site_id: string
+```
 
 - `GET /api/equipment` - Liste tous les équipements
 - `GET /api/sites/:siteId/equipment` - Liste les équipements d'un site
@@ -143,6 +245,51 @@ Authorization: Bearer <token>
 }
 ```
 
+## Websockets
+
+L'API doit supporter les WebSockets pour les mises à jour en temps réel :
+
+### Événements
+
+#### Connexion
+```
+ws://api-url/ws
+Headers:
+  Authorization: Bearer <token>
+```
+
+#### Types d'événements
+```typescript
+interface WebSocketEvent {
+  type: 'equipment_status' | 'new_alert' | 'alert_update' | 'site_status';
+  data: {
+    id: string;
+    // Données spécifiques à l'événement
+  };
+}
+```
+
+## Gestion des erreurs
+
+### Format des erreurs
+```typescript
+interface ApiError {
+  error: {
+    code: string;
+    message: string;
+    details?: unknown;
+  }
+}
+```
+
+### Codes d'erreur standards
+- `AUTH_REQUIRED`: Authentication requise
+- `AUTH_INVALID`: Token invalide
+- `NOT_FOUND`: Ressource non trouvée
+- `VALIDATION_ERROR`: Données invalides
+- `FORBIDDEN`: Action non autorisée
+- `INTERNAL_ERROR`: Erreur serveur
+
 ## Notes pour le développement
 
 1. Tous les timestamps doivent être en UTC et au format ISO 8601
@@ -152,4 +299,6 @@ Authorization: Bearer <token>
 5. Mettre en place des logs détaillés pour le debugging
 6. Implémenter des mécanismes de rate limiting
 7. Supporter CORS pour le développement local
-
+8. Implémenter des healthchecks pour le monitoring
+9. Mettre en place des backups réguliers de la base de données
+10. Configurer un système de monitoring des performances

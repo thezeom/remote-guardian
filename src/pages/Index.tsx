@@ -3,9 +3,40 @@ import { Card } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { cn } from "@/lib/utils";
 import SitesMap from "@/components/SitesMap";
-import { UserIcon } from "lucide-react";
+import { UserIcon, LogOut } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Index = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      logout();
+      toast({
+        title: "Déconnexion réussie",
+        description: "À bientôt !",
+      });
+      navigate('/');
+    } catch (error: any) {
+      console.error("Erreur lors de la déconnexion:", error);
+      toast({
+        title: "Erreur",
+        description: "Un problème est survenu lors de la déconnexion.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const equipmentData = [
     { name: 'Caméras', value: 35, color: '#2196F3' },
     { name: 'Routeurs', value: 15, color: '#FFA726' },
@@ -85,9 +116,19 @@ const Index = () => {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm">Global Secure SARL</span>
-          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-            <UserIcon className="w-4 h-4 text-muted-foreground" />
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="focus:outline-none">
+              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+                <UserIcon className="w-4 h-4 text-muted-foreground" />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                <LogOut className="w-4 h-4 mr-2" />
+                Se déconnecter
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 

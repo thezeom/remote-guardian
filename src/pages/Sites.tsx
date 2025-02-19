@@ -20,6 +20,13 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { UserIcon, LogOut } from "lucide-react";
 
 const Sites = () => {
   const navigate = useNavigate();
@@ -144,6 +151,11 @@ const Sites = () => {
     return matchesSearch && matchesStatus;
   });
 
+    const handleLogout = async () => {
+    localStorage.removeItem('token');
+    navigate('/');
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -153,13 +165,28 @@ const Sites = () => {
             Gestion et surveillance des sites
           </p>
         </div>
-        <Button 
-          className="bg-[#0e3175] hover:bg-[#0e3175]/90"
-          onClick={() => navigate('/sites/detected')}
-        >
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Nouveau site
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button 
+            className="bg-[#0e3175] hover:bg-[#0e3175]/90"
+            onClick={() => navigate('/sites/detected')}
+          >
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Nouveau site
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <UserIcon className="w-5 h-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                <LogOut className="mr-2 h-4 w-4" />
+                Se déconnecter
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <div className="flex items-center gap-4">

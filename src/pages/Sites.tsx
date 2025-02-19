@@ -69,7 +69,9 @@ const Sites = () => {
   });
 
   const deleteSiteMutation = useMutation({
-    mutationFn: deleteSite,
+    mutationFn: async (id: string) => {
+      await deleteSite(id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sites'] });
       toast({
@@ -135,7 +137,7 @@ const Sites = () => {
     }
   };
 
-  const filteredSites = sites.filter(site => {
+  const filteredSites = (sites as Site[]).filter(site => {
     const matchesSearch = site.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          site.address.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || site.status === statusFilter;

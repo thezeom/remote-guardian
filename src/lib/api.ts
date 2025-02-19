@@ -256,3 +256,22 @@ export class ApiClient {
 
 // Export une instance par défaut
 export const api = new ApiClient();
+
+// Export des fonctions individuelles
+export const getSites = () => api.getSites();
+export const getSiteById = (id: string) => api.getSiteById(id);
+export const createSite = (site: Omit<Site, "id" | "created_at" | "updated_at">) => api.createSite(site);
+export const updateSite = (id: string, site: Partial<Site>) => api.updateSite(id, site);
+export const deleteSite = (id: string) => api.deleteSite(id);
+export const getEquipment = () => api.getEquipment();
+export const getEquipmentBySite = (siteId: string) => api.getEquipmentBySite(siteId);
+export const createEquipment = (equipment: Omit<Equipment, "id" | "created_at" | "updated_at">) => api.createEquipment(equipment);
+export const updateEquipment = (id: string, equipment: Partial<Equipment>) => api.updateEquipment(id, equipment);
+export const deleteEquipment = (id: string) => api.deleteEquipment(id);
+export const getAlerts = () => api.getAlerts();
+export const getAlertsByEquipment = (equipmentId: string) => api.getAlertsByEquipment(equipmentId);
+export const createAlert = (alert: Omit<Alert, "id" | "created_at" | "updated_at">) => api.createAlert(alert);
+export const updateAlert = (id: string, alert: Partial<Alert>) => api.updateAlert(id, alert);
+export const getSiteStats = (siteId: string) => api.getSiteStats(siteId);
+export const registerAgent = (siteId: string, agentInfo: { name: string; version: string; os: string; }) => api.registerAgent(siteId, agentInfo);
+export const sendAgentData = (agentId: string, data: { metrics: any; devices: any[]; timestamp: string; }) => api.sendAgentData(agentId, data);

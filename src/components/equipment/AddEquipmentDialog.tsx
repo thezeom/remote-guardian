@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,7 @@ interface AddEquipmentDialogProps {
 export const AddEquipmentDialog = ({ siteId }: AddEquipmentDialogProps) => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [type, setType] = useState("");
+  const [type, setType] = useState<Equipment['type']>("camera");
   const [ipAddress, setIpAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
@@ -34,12 +35,11 @@ export const AddEquipmentDialog = ({ siteId }: AddEquipmentDialogProps) => {
         type,
         ip_address: ipAddress,
         site_id: siteId,
-        status: 'online'
+        status: 'online' as const,
+        last_maintenance: null
       };
 
-      const { error } = await createEquipment(newEquipment);
-
-      if (error) throw error;
+      await createEquipment(newEquipment);
 
       toast({
         title: "Équipement ajouté",
@@ -51,7 +51,7 @@ export const AddEquipmentDialog = ({ siteId }: AddEquipmentDialogProps) => {
       
       // Réinitialiser le formulaire et fermer la modale
       setName("");
-      setType("");
+      setType("camera");
       setIpAddress("");
       setOpen(false);
     } catch (error) {
@@ -91,7 +91,7 @@ export const AddEquipmentDialog = ({ siteId }: AddEquipmentDialogProps) => {
           
           <div className="space-y-2">
             <Label htmlFor="type">Type d'équipement</Label>
-            <Select value={type} onValueChange={setType} required>
+            <Select value={type} onValueChange={(value: Equipment['type']) => setType(value)} required>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un type" />
               </SelectTrigger>

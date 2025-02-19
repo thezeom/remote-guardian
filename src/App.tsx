@@ -16,6 +16,7 @@ import Alerts from "./pages/Alerts";
 import Settings from "./pages/Settings";
 import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
+import DemoLayout from "./components/DemoLayout";
 
 const queryClient = new QueryClient();
 
@@ -34,8 +35,19 @@ const App = () => (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Route publique unique pour l'authentification */}
+          {/* Routes publiques */}
           <Route path="/" element={<Landing />} />
+          <Route path="/demo/*" element={<DemoLayout />}>
+            <Route path="dashboard" element={<Index />} />
+            <Route path="sites" element={<Sites />} />
+            <Route path="sites/detected" element={<DetectedSites />} />
+            <Route path="sites/:siteId/equipment" element={<SiteEquipment />} />
+            <Route path="equipements" element={<Equipment />} />
+            <Route path="equipements/:id" element={<EquipmentDetail />} />
+            <Route path="alertes" element={<Alerts />} />
+            <Route path="configuration" element={<Settings />} />
+            <Route path="compte" element={<Account />} />
+          </Route>
           
           {/* Routes protégées avec Layout */}
           <Route path="/" element={

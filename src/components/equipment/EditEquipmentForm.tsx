@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,9 +31,7 @@ export const EditEquipmentForm = ({ equipment, onClose }: EditEquipmentFormProps
     setIsLoading(true);
 
     try {
-      const { error } = await updateEquipment(equipment.id, { name, type });
-
-      if (error) throw error;
+      await updateEquipment(equipment.id, { name, type });
 
       toast({
         title: "Équipement mis à jour",

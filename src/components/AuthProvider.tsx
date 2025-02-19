@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("User signed in, redirecting to dashboard");
         navigate("/dashboard");
       } else if (event === 'SIGNED_OUT') {
-        console.log("User signed out, redirecting to landing");
+        console.log("User signed out, redirecting to agent setup");
         navigate("/");
       }
       
@@ -47,22 +47,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       subscription.unsubscribe();
     };
   }, [navigate]);
-
-  // Protection des routes
-  useEffect(() => {
-    if (!isLoading) {
-      const publicPaths = ['/', '/landing'];
-      const isPublicRoute = publicPaths.includes(location.pathname);
-      
-      if (user && isPublicRoute) {
-        console.log("Authenticated user on public route, redirecting to dashboard");
-        navigate('/dashboard');
-      } else if (!user && !isPublicRoute) {
-        console.log("Unauthenticated user on protected route, redirecting to root");
-        navigate('/');
-      }
-    }
-  }, [user, isLoading, location.pathname, navigate]);
 
   return (
     <AuthContext.Provider value={{ user, isLoading }}>

@@ -22,26 +22,34 @@ const AgentSetup = () => {
     setIsLoading(true);
 
     try {
-      // 1. S'authentifier ou créer un compte
-      const authResponse = await supabase.auth.signInWithPassword({
+      console.log("Attempting sign in with:", { email, password });
+
+      // 1. Essayer de se connecter d'abord
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (authResponse.error) {
-        // Si la connexion échoue, essayer de créer un compte
-        const signUpResponse = await supabase.auth.signUp({
+      if (signInError) {
+        console.log("Sign in failed, attempting signup:", signInError);
+        // Si la connexion échoue, on tente l'inscription
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
         });
 
-        if (signUpResponse.error) {
-          throw signUpResponse.error;
+        if (signUpError) {
+          console.error("Signup failed:", signUpError);
+          throw signUpError;
         }
+
+        console.log("Signup successful:", signUpData);
+      } else {
+        console.log("Sign in successful:", signInData);
       }
 
       // 2. Créer le site avec le statut "pending"
-      const { error: siteError } = await supabase
+      const { data: siteData, error: siteError } = await supabase
         .from('sites')
         .insert([
           {
@@ -49,18 +57,25 @@ const AgentSetup = () => {
             address: "À configurer",
             status: "pending"
           }
-        ]);
+        ])
+        .select()
+        .single();
 
-      if (siteError) throw siteError;
+      if (siteError) {
+        console.error("Site creation failed:", siteError);
+        throw siteError;
+      }
+
+      console.log("Site created successfully:", siteData);
 
       toast({
         title: "Configuration réussie",
         description: "Votre site a été enregistré. Vous allez être redirigé.",
       });
 
-      // 3. Rediriger vers le dashboard
-      navigate("/dashboard");
+      // La redirection sera gérée par l'AuthProvider
     } catch (error: any) {
+      console.error("Setup failed:", error);
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue",

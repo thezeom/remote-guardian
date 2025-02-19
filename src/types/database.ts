@@ -3,8 +3,9 @@ export interface Site {
   id: string;
   name: string;
   address: string;
-  city: string;
-  postal_code: string;
+  city?: string;
+  postal_code?: string;
+  status: 'online' | 'offline' | 'warning' | 'pending';
   created_at: string;
   updated_at: string;
 }
@@ -25,8 +26,11 @@ export interface Alert {
   id: string;
   equipment_id: string;
   type: 'error' | 'warning' | 'info';
+  title: string;
   message: string;
+  description?: string;
   status: 'active' | 'resolved' | 'acknowledged';
   created_at: string;
   resolved_at: string | null;
+  updated_at?: string;
 }

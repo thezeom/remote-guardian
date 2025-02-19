@@ -53,7 +53,6 @@ const EquipmentDetail = () => {
     }
 
     if (portToUse === "22") {
-      // Pour le port SSH, on pourrait rediriger vers un terminal web comme Wetty ou Ttyd
       toast({
         title: "Information",
         description: "L'accès SSH via terminal web sera bientôt disponible",
@@ -203,11 +202,11 @@ const EquipmentDetail = () => {
                   "status-badge",
                   equipment.status === 'online' && "status-online",
                   equipment.status === 'offline' && "status-offline",
-                  equipment.status === 'warning' && "status-warning"
+                  equipment.status === 'maintenance' && "status-maintenance"
                 )}>
                   {equipment.status === 'online' && "En ligne"}
                   {equipment.status === 'offline' && "Hors ligne"}
-                  {equipment.status === 'warning' && "Attention"}
+                  {equipment.status === 'maintenance' && "Maintenance"}
                 </span>
               </dd>
             </div>

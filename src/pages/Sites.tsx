@@ -47,7 +47,7 @@ const Sites = () => {
   });
 
   const createSiteMutation = useMutation({
-    mutationFn: createSite,
+    mutationFn: (site: Omit<Site, 'id' | 'created_at' | 'updated_at'>) => createSite(site),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sites'] });
       toast({
@@ -101,7 +101,7 @@ const Sites = () => {
     createSiteMutation.mutate({
       name: newSiteName,
       address: newSiteAddress,
-      status: 'online'
+      status: 'pending' as const
     });
   };
 

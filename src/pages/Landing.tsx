@@ -1,12 +1,56 @@
+
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, Lock, Wifi } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Landing = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      if (!isLogin) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (error) throw error;
+        toast({
+          title: "Inscription réussie",
+          description: "Votre compte a été créé avec succès.",
+        });
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw error;
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      console.error("Erreur d'authentification:", error);
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#0e3175]/5 via-white to-[#0e3175]/5">
@@ -97,24 +141,14 @@ const Landing = () => {
                     </p>
                   </div>
 
-                  <form className="space-y-4">
-                    {!isLogin && (
-                      <div className="space-y-2 animate-fade-in">
-                        <Label htmlFor="company" className="text-sm font-medium">Nom de l'entreprise</Label>
-                        <Input 
-                          id="company" 
-                          type="text" 
-                          placeholder="Global Secure SARL"
-                          className="h-10 px-4 bg-white text-sm focus:ring-2 focus:ring-[#0e3175] focus:ring-offset-0"
-                        />
-                      </div>
-                    )}
-                    
+                  <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2 animate-fade-in [animation-delay:200ms]">
                       <Label htmlFor="email" className="text-sm font-medium">Email</Label>
                       <Input 
                         id="email" 
                         type="email" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         placeholder="contact@entreprise.fr"
                         className="h-10 px-4 bg-white text-sm focus:ring-2 focus:ring-[#0e3175] focus:ring-offset-0"
                       />
@@ -125,22 +159,15 @@ const Landing = () => {
                       <Input 
                         id="password" 
                         type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         className="h-10 px-4 bg-white text-sm focus:ring-2 focus:ring-[#0e3175] focus:ring-offset-0"
                       />
                     </div>
 
-                    {!isLogin && (
-                      <div className="space-y-2 animate-fade-in [animation-delay:600ms]">
-                        <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirmer le mot de passe</Label>
-                        <Input 
-                          id="confirmPassword" 
-                          type="password"
-                          className="h-10 px-4 bg-white text-sm focus:ring-2 focus:ring-[#0e3175] focus:ring-offset-0"
-                        />
-                      </div>
-                    )}
-
                     <Button 
+                      type="submit"
+                      disabled={isLoading}
                       className="w-full bg-[#0e3175] hover:bg-[#0e3175]/90 h-10 text-sm font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 animate-fade-in [animation-delay:800ms]"
                     >
                       {isLogin ? (
@@ -148,7 +175,7 @@ const Landing = () => {
                       ) : (
                         <Lock className="mr-2 h-4 w-4" />
                       )}
-                      {isLogin ? "Se connecter" : "Créer un compte"}
+                      {isLoading ? "Chargement..." : (isLogin ? "Se connecter" : "Créer un compte")}
                     </Button>
                   </form>
 
@@ -157,6 +184,7 @@ const Landing = () => {
                       <>
                         Pas encore de compte ?{" "}
                         <button
+                          type="button"
                           onClick={() => setIsLogin(false)}
                           className="text-[#0e3175] font-medium hover:underline transition-all hover:-translate-y-0.5"
                         >
@@ -167,6 +195,7 @@ const Landing = () => {
                       <>
                         Déjà un compte ?{" "}
                         <button
+                          type="button"
                           onClick={() => setIsLogin(true)}
                           className="text-[#0e3175] font-medium hover:underline transition-all hover:-translate-y-0.5"
                         >

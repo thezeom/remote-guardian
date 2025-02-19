@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
 import Layout from "./components/Layout";
 import Landing from "./pages/Landing";
-import Auth from "./pages/Auth";
 import Index from "./pages/Index";
 import Sites from "./pages/Sites";
 import Equipment from "./pages/Equipment";
@@ -38,10 +37,8 @@ const App = () => (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Routes publiques */}
+          {/* Route publique unique pour l'authentification */}
           <Route path="/" element={<Landing />} />
-          <Route path="/landing" element={<Landing />} />
-          <Route path="/auth" element={<Auth />} />
           
           {/* Routes protégées avec Layout */}
           <Route path="/" element={

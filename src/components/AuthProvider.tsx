@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Vérifier la session initiale
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial session check:", session);
       setUser(session?.user ?? null);
       if (session?.user) {
         navigate("/dashboard");
@@ -34,7 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log("Auth state changed:", event, session);
       setUser(session?.user ?? null);
       
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      if (event === 'SIGNED_IN') {
         console.log("User signed in, redirecting to dashboard");
         navigate("/dashboard");
       } else if (event === 'SIGNED_OUT') {
@@ -53,14 +54,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Protection des routes
   useEffect(() => {
     if (!isLoading) {
-      const publicRoutes = ['/', '/landing', '/auth'];
-      const isPublicRoute = publicRoutes.includes(location.pathname);
+      const isRootRoute = location.pathname === '/';
       
-      if (user && isPublicRoute) {
-        console.log("Authenticated user on public route, redirecting to dashboard");
+      if (user && isRootRoute) {
+        console.log("Authenticated user on root route, redirecting to dashboard");
         navigate('/dashboard');
-      } else if (!user && !isPublicRoute) {
-        console.log("Unauthenticated user on protected route, redirecting to landing");
+      } else if (!user && !isRootRoute) {
+        console.log("Unauthenticated user on protected route, redirecting to root");
         navigate('/');
       }
     }

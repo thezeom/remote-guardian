@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
@@ -54,23 +60,24 @@ const Account = () => {
         <Card className="p-6 glass">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="h-24 w-24 rounded-lg bg-secondary flex items-center justify-center">
-                <UserIcon className="w-12 h-12 text-muted-foreground" />
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="h-24 w-24 rounded-lg bg-secondary flex items-center justify-center cursor-pointer hover:bg-secondary/80 transition-colors">
+                    <UserIcon className="w-12 h-12 text-muted-foreground" />
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Se déconnecter
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <div>
                 <h2 className="text-xl font-semibold">Global Secure SARL</h2>
                 <p className="text-muted-foreground">Configuration de l'entreprise</p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <LogOut className="h-4 w-4" />
-              Se déconnecter
-            </Button>
           </div>
         </Card>
 

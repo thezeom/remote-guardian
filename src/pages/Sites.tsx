@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -115,6 +114,30 @@ const Sites = () => {
     const matchesStatus = statusFilter === "all" || site.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const handleAssociateSite = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('sites')
+        .update({ status: 'online' })
+        .eq('id', id);
+      
+      if (error) throw error;
+
+      toast({
+        title: "Succès",
+        description: "Le site a été associé avec succès.",
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'associer le site. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -240,27 +263,42 @@ const Sites = () => {
                     "px-2 py-1 rounded-full text-xs font-medium",
                     site.status === 'online' && "bg-green-100 text-green-800",
                     site.status === 'offline' && "bg-red-100 text-red-800",
-                    site.status === 'warning' && "bg-yellow-100 text-yellow-800"
+                    site.status === 'warning' && "bg-yellow-100 text-yellow-800",
+                    site.status === 'pending' && "bg-blue-100 text-blue-800"
                   )}>
                     {site.status === 'online' && "En ligne"}
                     {site.status === 'offline' && "Hors ligne"}
                     {site.status === 'warning' && "Attention"}
+                    {site.status === 'pending' && "Nouveau site détecté"}
                   </div>
                   <div className="flex gap-2">
-                    <Link to={`/sites/${site.id}/equipment`}>
-                      <Button variant="ghost" size="icon">
-                        <ArrowRight className="w-4 h-4" />
+                    {site.status === 'pending' ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAssociateSite(site.id)}
+                        className="text-blue-500 hover:text-blue-600"
+                      >
+                        Associer
                       </Button>
-                    </Link>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-500 hover:text-red-600"
-                      onClick={() => handleDeleteSite(site.id)}
-                      disabled={deleteSiteMutation.isPending}
-                    >
-                      <Trash2Icon className="w-4 h-4" />
-                    </Button>
+                    ) : (
+                      <>
+                        <Link to={`/sites/${site.id}/equipment`}>
+                          <Button variant="ghost" size="icon">
+                            <ArrowRight className="w-4 h-4" />
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:text-red-600"
+                          onClick={() => handleDeleteSite(site.id)}
+                          disabled={deleteSiteMutation.isPending}
+                        >
+                          <Trash2Icon className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

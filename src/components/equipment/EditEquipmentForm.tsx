@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,9 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Equipment } from "@/types/database";
+import { Equipment } from "@/types/api";
+import { updateEquipment } from "@/lib/api";
 
 interface EditEquipmentFormProps {
   equipment: Equipment;
@@ -31,13 +30,7 @@ export const EditEquipmentForm = ({ equipment, onClose }: EditEquipmentFormProps
     setIsLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('equipment')
-        .update({
-          name,
-          type
-        })
-        .eq('id', equipment.id);
+      const { error } = await updateEquipment(equipment.id, { name, type });
 
       if (error) throw error;
 

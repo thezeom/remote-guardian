@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Equipment } from "@/types/database";
-import { supabase } from "@/integrations/supabase/client";
+import { Equipment } from "@/types/api";
+import { createEquipment } from "@/lib/api";
 
 interface AddEquipmentDialogProps {
   siteId: string;
@@ -38,9 +37,7 @@ export const AddEquipmentDialog = ({ siteId }: AddEquipmentDialogProps) => {
         status: 'online'
       };
 
-      const { error } = await supabase
-        .from('equipment')
-        .insert([newEquipment]);
+      const { error } = await createEquipment(newEquipment);
 
       if (error) throw error;
 

@@ -12,7 +12,7 @@ import type { Site, Equipment, Alert } from "@/types/database";
 /**
  * Base URL de l'API. À configurer selon l'environnement.
  */
-const API_URL = process.env.API_URL || "http://localhost:3000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 /**
  * Classe principale pour les appels API

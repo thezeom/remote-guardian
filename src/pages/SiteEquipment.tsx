@@ -2,29 +2,35 @@
 import { useParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { getEquipmentBySite } from "@/lib/api";
+import { Equipment } from "@/types/database";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Search, Filter, ServerIcon, CameraIcon, NetworkIcon, VideoIcon, WifiIcon, RouterIcon, MonitorIcon, ArrowRight } from "lucide-react";
+import { ArrowLeft, Search, Filter, ServerIcon, CameraIcon, NetworkIcon, VideoIcon, WifiIcon, RouterIcon, MonitorIcon, Plus } from "lucide-react";
 
 const SiteEquipment = () => {
   const { siteId } = useParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const { toast } = useToast();
 
-  const equipment = [
-    {
-      id: 1,
-      name: "Camera IP-01",
-      type: "camera",
-      status: "online",
-      ip: "192.168.1.101",
-      lastMaintenance: "2024-02-15"
-    },
-    // Ajoutez d'autres équipements selon vos besoins
-  ];
+  const { data: equipment, isLoading, error } = useQuery({
+    queryKey: ['equipment', siteId],
+    queryFn: () => siteId ? getEquipmentBySite(siteId) : Promise.resolve([]),
+  });
+
+  if (error) {
+    toast({
+      variant: "destructive",
+      title: "Erreur",
+      description: "Impossible de charger les équipements"
+    });
+  }
 
   const getIcon = (type: string) => {
     switch(type) {
@@ -36,37 +42,40 @@ const SiteEquipment = () => {
         return <NetworkIcon className="w-5 h-5" />;
       case 'server':
         return <ServerIcon className="w-5 h-5" />;
-      case 'antenna':
+      case 'access_point':
         return <WifiIcon className="w-5 h-5" />;
       case 'router':
         return <RouterIcon className="w-5 h-5" />;
-      case 'pc':
-        return <MonitorIcon className="w-5 h-5" />;
       default:
         return <ServerIcon className="w-5 h-5" />;
     }
   };
 
-  const filteredEquipment = equipment.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.ip.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredEquipment = equipment?.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = typeFilter === "all" || item.type === typeFilter;
     const matchesStatus = statusFilter === "all" || item.status === statusFilter;
     return matchesSearch && matchesType && matchesStatus;
-  });
+  }) || [];
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center gap-4">
-        <Link to="/sites" className="text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold">Équipements du site</h1>
-          <p className="text-muted-foreground">
-            Gestion des équipements pour ce site
-          </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link to="/sites" className="text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold">Équipements du site</h1>
+            <p className="text-muted-foreground">
+              Gestion des équipements pour ce site
+            </p>
+          </div>
         </div>
+        <Button>
+          <Plus className="w-4 h-4 mr-2" />
+          Ajouter un équipement
+        </Button>
       </div>
 
       <div className="flex items-center gap-4">
@@ -91,9 +100,8 @@ const SiteEquipment = () => {
               <SelectItem value="video-recorder">Enregistreurs vidéo</SelectItem>
               <SelectItem value="switch">Switches</SelectItem>
               <SelectItem value="server">Serveurs</SelectItem>
-              <SelectItem value="antenna">Antennes/Points d'accès WiFi</SelectItem>
+              <SelectItem value="access_point">Points d'accès WiFi</SelectItem>
               <SelectItem value="router">Routeurs</SelectItem>
-              <SelectItem value="pc">PC</SelectItem>
               <SelectItem value="other">Autres</SelectItem>
             </SelectContent>
           </Select>
@@ -114,38 +122,37 @@ const SiteEquipment = () => {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredEquipment.map((item) => (
-          <Link to={`/equipements/${item.id}`} key={item.id}>
-            <Card className="p-4 hover:shadow-lg transition-all">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  {getIcon(item.type)}
-                  <div>
-                    <h3 className="font-medium">{item.name}</h3>
-                    <p className="text-sm text-muted-foreground">{item.ip}</p>
+      {isLoading ? (
+        <div className="text-center py-8">Chargement des équipements...</div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredEquipment.map((item) => (
+            <Link to={`/equipements/${item.id}`} key={item.id}>
+              <Card className="p-4 hover:shadow-lg transition-all">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    {getIcon(item.type)}
+                    <div>
+                      <h3 className="font-medium">{item.name}</h3>
+                      <p className="text-sm text-muted-foreground">{item.ip_address || 'Pas d\'IP'}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
                   <div className={cn(
-                    "status-badge",
-                    item.status === 'online' && "status-online",
-                    item.status === 'offline' && "status-offline",
-                    item.status === 'warning' && "status-warning"
+                    "px-2 py-1 rounded-full text-xs font-medium",
+                    item.status === 'online' && "bg-green-100 text-green-700",
+                    item.status === 'offline' && "bg-red-100 text-red-700",
+                    item.status === 'warning' && "bg-yellow-100 text-yellow-700"
                   )}>
                     {item.status === 'online' && "En ligne"}
                     {item.status === 'offline' && "Hors ligne"}
                     {item.status === 'warning' && "Attention"}
                   </div>
-                  <Button variant="ghost" size="icon">
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
                 </div>
-              </div>
-            </Card>
-          </Link>
-        ))}
-      </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

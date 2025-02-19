@@ -46,7 +46,7 @@ L'application nécessite une API REST avec les endpoints suivants :
 
 ### Types de données
 
-Les types de données sont définis dans `src/types/api.ts`. Ils incluent :
+Les types de données sont définis dans `src/types/database.ts`. Ils incluent :
 - `Site` : Informations sur un site client
 - `Equipment` : Informations sur un équipement
 - `Alert` : Informations sur une alerte
@@ -90,7 +90,7 @@ Pour implémenter le backend, vous devez :
 
 1. Créer une API REST respectant les endpoints listés ci-dessus
 2. Implémenter l'authentification JWT
-3. Respecter les types de données définis dans `src/types/api.ts`
+3. Respecter les types de données définis dans `src/types/database.ts`
 4. Assurer la validation des données côté serveur
 5. Gérer les erreurs de manière appropriée avec des codes HTTP standards
 

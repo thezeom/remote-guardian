@@ -67,6 +67,17 @@ export const getEquipmentBySite = async (siteId: string) => {
   return data as Equipment[];
 };
 
+export const getEquipmentById = async (id: string) => {
+  const { data, error } = await supabase
+    .from('equipment')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) throw error;
+  return data as Equipment;
+};
+
 // Alerts
 export const getAlerts = async () => {
   const { data, error } = await supabase

@@ -4,35 +4,61 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { Equipment } from "@/types/database";
 
 interface EditEquipmentFormProps {
-  equipment: {
-    id: number;
-    name: string;
-  };
+  equipment: Equipment;
   onClose: () => void;
 }
 
 export const EditEquipmentForm = ({ equipment, onClose }: EditEquipmentFormProps) => {
   const [name, setName] = useState(equipment.name);
+  const [type, setType] = useState(equipment.type);
+  const [ipAddress, setIpAddress] = useState(equipment.ip_address || "");
+  const [isLoading, setIsLoading] = useState(false);
+  
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Simuler la mise à jour
-    console.log("Updating equipment name to:", name);
-    
-    toast({
-      title: "Équipement mis à jour",
-      description: "Les modifications ont été enregistrées avec succès."
-    });
-    
-    onClose();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase
+        .from('equipment')
+        .update({
+          name,
+          type,
+          ip_address: ipAddress
+        })
+        .eq('id', equipment.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Équipement mis à jour",
+        description: "Les modifications ont été enregistrées avec succès"
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['equipment', equipment.site_id] });
+      onClose();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour l'équipement"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -60,10 +86,39 @@ export const EditEquipmentForm = ({ equipment, onClose }: EditEquipmentFormProps
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Entrez le nom de l'équipement"
+            required
           />
         </div>
 
-        <div className="flex justify-end gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="type">Type d'équipement</Label>
+          <Select value={type} onValueChange={setType} required>
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionnez un type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="camera">Caméra</SelectItem>
+              <SelectItem value="video-recorder">Enregistreur vidéo</SelectItem>
+              <SelectItem value="switch">Switch</SelectItem>
+              <SelectItem value="server">Serveur</SelectItem>
+              <SelectItem value="access_point">Point d'accès WiFi</SelectItem>
+              <SelectItem value="router">Routeur</SelectItem>
+              <SelectItem value="other">Autre</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="ip">Adresse IP</Label>
+          <Input
+            id="ip"
+            value={ipAddress}
+            onChange={(e) => setIpAddress(e.target.value)}
+            placeholder="Entrez l'adresse IP"
+          />
+        </div>
+
+        <div className="flex justify-end gap-4 pt-4">
           <Button
             type="button"
             variant="outline"
@@ -71,8 +126,8 @@ export const EditEquipmentForm = ({ equipment, onClose }: EditEquipmentFormProps
           >
             Annuler
           </Button>
-          <Button type="submit">
-            Enregistrer
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Enregistrement..." : "Enregistrer"}
           </Button>
         </div>
       </form>

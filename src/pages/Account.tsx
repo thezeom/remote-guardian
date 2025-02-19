@@ -1,12 +1,14 @@
 
 import { Card } from "@/components/ui/card";
-import { UserIcon } from "lucide-react";
+import { UserIcon, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@/components/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 const Account = () => {
   const [user, setUser] = useState({
@@ -19,8 +21,21 @@ const Account = () => {
     lastLogin: new Date().toLocaleString()
   });
 
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
   const handleSave = () => {
     toast.success("Modifications enregistrées avec succès");
+  };
+
+  const handleLogout = async () => {
+    try {
+      logout();
+      toast.success("Déconnexion réussie");
+      navigate("/");
+    } catch (error) {
+      toast.error("Erreur lors de la déconnexion");
+    }
   };
 
   return (
@@ -37,14 +52,25 @@ const Account = () => {
 
       <div className="grid gap-4">
         <Card className="p-6 glass">
-          <div className="flex items-center gap-4">
-            <div className="h-24 w-24 rounded-lg bg-secondary flex items-center justify-center">
-              <UserIcon className="w-12 h-12 text-muted-foreground" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-24 w-24 rounded-lg bg-secondary flex items-center justify-center">
+                <UserIcon className="w-12 h-12 text-muted-foreground" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">Global Secure SARL</h2>
+                <p className="text-muted-foreground">Configuration de l'entreprise</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-semibold">Global Secure SARL</h2>
-              <p className="text-muted-foreground">Configuration de l'entreprise</p>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <LogOut className="h-4 w-4" />
+              Se déconnecter
+            </Button>
           </div>
         </Card>
 

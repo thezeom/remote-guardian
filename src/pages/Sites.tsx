@@ -20,13 +20,15 @@ const Sites = () => {
   const { data: sites = [], isLoading, refetch } = useQuery({
     queryKey: ['sites'],
     queryFn: getSites,
-    onError: (error) => {
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les sites. Veuillez réessayer.",
-        variant: "destructive",
-      });
-      console.error("Error fetching sites:", error);
+    meta: {
+      onError: (error: Error) => {
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les sites. Veuillez réessayer.",
+          variant: "destructive",
+        });
+        console.error("Error fetching sites:", error);
+      },
     },
   });
 

@@ -22,8 +22,8 @@ export const Sidebar = ({ isCollapsed, onCollapse }: SidebarProps) => {
   ];
 
   return (
-    <div className={cn(
-      "fixed left-0 top-0 h-screen bg-white border-r border-border/50 transition-all duration-300 z-50",
+    <aside className={cn(
+      "fixed left-0 top-0 h-screen bg-white border-r border-border/50 transition-all duration-300",
       isCollapsed ? "w-20" : "w-64"
     )}>
       <div className="flex items-center gap-3 p-4 border-b border-border/50">
@@ -60,6 +60,6 @@ export const Sidebar = ({ isCollapsed, onCollapse }: SidebarProps) => {
           );
         })}
       </nav>
-    </div>
+    </aside>
   );
 };

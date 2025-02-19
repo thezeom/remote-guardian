@@ -1,12 +1,11 @@
 
 import { useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "./Sidebar";
 import { LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const Layout = () => {
@@ -55,7 +54,7 @@ const Layout = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 overflow-hidden">
       <Sidebar isCollapsed={isCollapsed} onCollapse={setIsCollapsed} />
       <div className={cn(
         "flex-1 flex flex-col min-h-screen transition-all duration-300",
@@ -77,7 +76,7 @@ const Layout = () => {
             </Button>
           </div>
         </header>
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
           <Outlet />
         </main>
       </div>

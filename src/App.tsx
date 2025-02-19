@@ -27,7 +27,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!user) {
-    return <Navigate to="/auth" />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -40,6 +40,7 @@ const App = () => (
         <Routes>
           {/* Routes publiques */}
           <Route path="/" element={<Landing />} />
+          <Route path="/landing" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
           
           {/* Routes protégées avec Layout */}

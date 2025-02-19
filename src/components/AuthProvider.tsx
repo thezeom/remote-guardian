@@ -23,36 +23,52 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Vérifier la session initiale
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        navigate("/dashboard");
+      }
       setIsLoading(false);
     });
 
     // Écouter les changements d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session);
       setUser(session?.user ?? null);
-      setIsLoading(false);
       
-      // Redirection basée sur l'authentification
-      if (session?.user) {
-        // Si l'utilisateur est connecté et sur une page publique, rediriger vers le dashboard
-        if (location.pathname === "/" || location.pathname === "/auth") {
-          navigate("/dashboard");
-        }
-      } else {
-        // Si l'utilisateur n'est pas connecté et essaie d'accéder à une route protégée
-        if (location.pathname !== "/" && location.pathname !== "/auth") {
-          navigate("/");
-        }
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        console.log("User signed in, redirecting to dashboard");
+        navigate("/dashboard");
+      } else if (event === 'SIGNED_OUT') {
+        console.log("User signed out, redirecting to landing");
+        navigate("/");
       }
+      
+      setIsLoading(false);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, location]);
+  }, [navigate]);
+
+  // Protection des routes
+  useEffect(() => {
+    if (!isLoading) {
+      const publicRoutes = ['/', '/landing', '/auth'];
+      const isPublicRoute = publicRoutes.includes(location.pathname);
+      
+      if (user && isPublicRoute) {
+        console.log("Authenticated user on public route, redirecting to dashboard");
+        navigate('/dashboard');
+      } else if (!user && !isPublicRoute) {
+        console.log("Unauthenticated user on protected route, redirecting to landing");
+        navigate('/');
+      }
+    }
+  }, [user, isLoading, location.pathname, navigate]);
 
   return (
     <AuthContext.Provider value={{ user, isLoading }}>
-      {children}
+      {!isLoading && children}
     </AuthContext.Provider>
   );
 };

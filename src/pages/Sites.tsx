@@ -1,10 +1,11 @@
+
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { PlusCircle, RefreshCcw, ArrowRight, Trash2Icon, Search, Filter } from "lucide-react";
+import { PlusCircle, RefreshCcw, ArrowRight, Trash2Icon, Search, Filter, UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getSites, createSite, updateSite, deleteSite } from "@/lib/api";
@@ -22,6 +23,12 @@ import {
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Sites = () => {
   const navigate = useNavigate();
@@ -182,15 +189,20 @@ const Sites = () => {
             <PlusCircle className="w-4 h-4 mr-2" />
             Nouveau site
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-          >
-            <LogOut className="h-4 w-4" />
-            Se déconnecter
-          </Button>
+          <span className="text-sm">Global Secure SARL</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="focus:outline-none">
+              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+                <UserIcon className="w-4 h-4 text-muted-foreground" />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                <LogOut className="w-4 h-4 mr-2" />
+                Se déconnecter
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 

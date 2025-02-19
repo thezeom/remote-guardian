@@ -5,16 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
+import { useState } from "react";
+import { toast } from "sonner";
+import { useAuth } from "@/components/AuthProvider";
+import { useNavigate } from "react-router-dom";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
-import { toast } from "sonner";
-import { useAuth } from "@/components/AuthProvider";
-import { useNavigate } from "react-router-dom";
 
 const Account = () => {
   const [user, setUser] = useState({
@@ -38,9 +38,10 @@ const Account = () => {
     try {
       logout();
       toast.success("Déconnexion réussie");
-      navigate("/");
-    } catch (error) {
-      toast.error("Erreur lors de la déconnexion");
+      navigate('/');
+    } catch (error: any) {
+      console.error("Erreur lors de la déconnexion:", error);
+      toast.error("Un problème est survenu lors de la déconnexion.");
     }
   };
 
@@ -53,7 +54,22 @@ const Account = () => {
             Gestion de votre compte
           </p>
         </div>
-        <Button onClick={handleSave}>Enregistrer les modifications</Button>
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Global Secure SARL</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="focus:outline-none">
+              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+                <UserIcon className="w-4 h-4 text-muted-foreground" />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                <LogOut className="w-4 h-4 mr-2" />
+                Se déconnecter
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <div className="grid gap-4">

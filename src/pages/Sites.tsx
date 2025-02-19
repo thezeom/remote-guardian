@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +9,7 @@ import { PlusCircle, RefreshCcw, ArrowRight, Trash2Icon, Search, Filter } from "
 import { cn } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getSites, createSite, updateSite, deleteSite } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
 import { Site } from "@/types/database";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -108,13 +110,6 @@ const Sites = () => {
     }
   };
 
-  const filteredSites = sites.filter(site => {
-    const matchesSearch = site.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         site.address.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || site.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
   const handleAssociateSite = async (id: string) => {
     try {
       const { error } = await supabase
@@ -138,6 +133,13 @@ const Sites = () => {
       });
     }
   };
+
+  const filteredSites = sites.filter(site => {
+    const matchesSearch = site.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         site.address.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || site.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -219,6 +221,7 @@ const Sites = () => {
               <SelectItem value="online">En ligne</SelectItem>
               <SelectItem value="offline">Hors ligne</SelectItem>
               <SelectItem value="warning">Attention</SelectItem>
+              <SelectItem value="pending">Nouveaux sites</SelectItem>
             </SelectContent>
           </Select>
         </div>

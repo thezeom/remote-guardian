@@ -3,7 +3,7 @@ export interface Site {
   id: string;
   name: string;
   address: string;
-  status: 'online' | 'offline' | 'warning';
+  status: 'online' | 'offline' | 'warning' | 'pending';
   created_at: string;
   updated_at: string;
 }

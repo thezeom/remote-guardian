@@ -11,7 +11,7 @@ import { getSites, createSite, updateSite, deleteSite } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { Site } from "@/types/database";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/components/AuthProvider";
 import {
   Dialog,
   DialogContent,
@@ -21,13 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { UserIcon, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 const Sites = () => {
   const navigate = useNavigate();

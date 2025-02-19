@@ -7,61 +7,28 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PlusCircle, RefreshCcw, ArrowRight, Trash2Icon, Search, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { getSites } from "@/lib/api";
+import { Site } from "@/types/database";
+import { useToast } from "@/hooks/use-toast";
 
 const Sites = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const { toast } = useToast();
 
-  const sites = [
-    {
-      id: 1,
-      name: "Site Paris Centre",
-      address: "15 Rue de la Paix, 75001 Paris",
-      status: "online",
-      equipments: 12,
-      lastCheck: "Il y a 2 min",
+  const { data: sites = [], isLoading, refetch } = useQuery({
+    queryKey: ['sites'],
+    queryFn: getSites,
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les sites. Veuillez réessayer.",
+        variant: "destructive",
+      });
+      console.error("Error fetching sites:", error);
     },
-    {
-      id: 2, 
-      name: "Site Lyon Sud",
-      address: "25 Avenue Jean Jaurès, 69007 Lyon",
-      status: "online",
-      equipments: 8,
-      lastCheck: "Il y a 5 min",
-    },
-    {
-      id: 3,
-      name: "Site Marseille Port",
-      address: "45 Quai des Belges, 13001 Marseille",
-      status: "offline",
-      equipments: 15,
-      lastCheck: "Il y a 1h",
-    },
-    {
-      id: 4,
-      name: "Site Bordeaux Nord",
-      address: "78 Cours Portal, 33000 Bordeaux",
-      status: "online",
-      equipments: 10,
-      lastCheck: "Il y a 10 min",
-    },
-    {
-      id: 5,
-      name: "Site Lille Centre",
-      address: "56 Rue Faidherbe, 59000 Lille",
-      status: "online",
-      equipments: 6,
-      lastCheck: "Il y a 3 min",
-    },
-    {
-      id: 6,
-      name: "Site Nantes Est",
-      address: "34 Boulevard des Anglais, 44000 Nantes",
-      status: "warning",
-      equipments: 9,
-      lastCheck: "Il y a 15 min",
-    }
-  ];
+  });
 
   const filteredSites = sites.filter(site => {
     const matchesSearch = site.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -109,50 +76,68 @@ const Sites = () => {
             </SelectContent>
           </Select>
         </div>
-        <Button variant="outline" size="icon" className="ml-auto">
-          <RefreshCcw className="w-4 h-4" />
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="ml-auto"
+          onClick={() => refetch()}
+          disabled={isLoading}
+        >
+          <RefreshCcw className={cn("w-4 h-4", isLoading && "animate-spin")} />
         </Button>
       </div>
 
       <div className="grid gap-4">
-        {filteredSites.map((site) => (
-          <Card key={site.id} className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold">{site.name}</h3>
-                <p className="text-sm text-muted-foreground">{site.address}</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <Link to={`/sites/${site.id}/equipment`} className="text-sm font-medium hover:text-indigo-600">
-                    {site.equipments} équipements
-                  </Link>
-                  <p className="text-xs text-muted-foreground">Dernière synchronisation: {site.lastCheck}</p>
-                </div>
-                <div className={cn(
-                  "status-badge",
-                  site.status === 'online' && "status-online",
-                  site.status === 'offline' && "status-offline",
-                  site.status === 'warning' && "status-warning"
-                )}>
-                  {site.status === 'online' && "En ligne"}
-                  {site.status === 'offline' && "Hors ligne"}
-                  {site.status === 'warning' && "Attention"}
-                </div>
-                <div className="flex gap-2">
-                  <Link to={`/sites/${site.id}/equipment`}>
-                    <Button variant="ghost" size="icon">
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
-                  </Link>
-                  <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600">
-                    <Trash2Icon className="w-4 h-4" />
-                  </Button>
+        {isLoading ? (
+          <Card className="p-4">
+            <div className="animate-pulse flex space-x-4">
+              <div className="flex-1 space-y-4 py-1">
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
                 </div>
               </div>
             </div>
           </Card>
-        ))}
+        ) : filteredSites.length === 0 ? (
+          <Card className="p-8 text-center">
+            <p className="text-muted-foreground">Aucun site trouvé</p>
+          </Card>
+        ) : (
+          filteredSites.map((site) => (
+            <Card key={site.id} className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold">{site.name}</h3>
+                  <p className="text-sm text-muted-foreground">{site.address}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "status-badge",
+                    site.status === 'online' && "status-online",
+                    site.status === 'offline' && "status-offline",
+                    site.status === 'warning' && "status-warning"
+                  )}>
+                    {site.status === 'online' && "En ligne"}
+                    {site.status === 'offline' && "Hors ligne"}
+                    {site.status === 'warning' && "Attention"}
+                  </div>
+                  <div className="flex gap-2">
+                    <Link to={`/sites/${site.id}/equipment`}>
+                      <Button variant="ghost" size="icon">
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                    <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600">
+                      <Trash2Icon className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   );

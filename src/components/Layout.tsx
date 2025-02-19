@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "./Sidebar";
 import { LogOut } from "lucide-react";
@@ -13,6 +13,26 @@ const Layout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const getPageTitle = (pathname: string) => {
+    switch (pathname) {
+      case '/dashboard':
+        return 'Tableau de bord';
+      case '/sites':
+        return 'Sites clients';
+      case '/equipements':
+        return 'Équipements';
+      case '/alertes':
+        return 'Alertes';
+      case '/configuration':
+        return 'Configuration';
+      case '/compte':
+        return 'Compte';
+      default:
+        return 'Tableau de bord';
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -43,7 +63,9 @@ const Layout = () => {
       )}>
         <header className="bg-white shadow-sm border-b sticky top-0 z-10">
           <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-900">Tableau de bord</h1>
+            <h1 className="text-xl font-semibold text-gray-900">
+              {getPageTitle(location.pathname)}
+            </h1>
             <Button
               variant="outline"
               size="sm"

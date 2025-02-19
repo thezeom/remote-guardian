@@ -3,7 +3,8 @@ export interface Site {
   id: string;
   name: string;
   address: string;
-  status: 'online' | 'offline' | 'warning' | 'pending';
+  city: string;
+  postal_code: string;
   created_at: string;
   updated_at: string;
 }
@@ -12,8 +13,8 @@ export interface Equipment {
   id: string;
   site_id: string;
   name: string;
-  type: 'camera' | 'router' | 'switch' | 'server' | 'access_point' | 'other';
-  status: 'online' | 'offline' | 'warning';
+  type: 'camera' | 'video-recorder' | 'switch' | 'server' | 'access_point' | 'router' | 'other';
+  status: 'online' | 'offline' | 'maintenance';
   ip_address: string | null;
   last_maintenance: string | null;
   created_at: string;
@@ -22,11 +23,10 @@ export interface Equipment {
 
 export interface Alert {
   id: string;
-  title: string;
-  description: string | null;
-  type: 'error' | 'warning' | 'success';
-  status: 'new' | 'in_progress' | 'resolved';
   equipment_id: string;
+  type: 'error' | 'warning' | 'info';
+  message: string;
+  status: 'active' | 'resolved' | 'acknowledged';
   created_at: string;
-  updated_at: string;
+  resolved_at: string | null;
 }

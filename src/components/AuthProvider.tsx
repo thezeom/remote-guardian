@@ -24,9 +24,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log("Initial session check:", session);
       setUser(session?.user ?? null);
-      if (session?.user) {
-        navigate("/dashboard");
-      }
       setIsLoading(false);
     });
 

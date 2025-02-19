@@ -20,7 +20,6 @@ interface EditEquipmentFormProps {
 export const EditEquipmentForm = ({ equipment, onClose }: EditEquipmentFormProps) => {
   const [name, setName] = useState(equipment.name);
   const [type, setType] = useState<Equipment['type']>(equipment.type);
-  const [ipAddress, setIpAddress] = useState(equipment.ip_address || "");
   const [isLoading, setIsLoading] = useState(false);
   
   const { toast } = useToast();
@@ -36,8 +35,7 @@ export const EditEquipmentForm = ({ equipment, onClose }: EditEquipmentFormProps
         .from('equipment')
         .update({
           name,
-          type,
-          ip_address: ipAddress
+          type
         })
         .eq('id', equipment.id);
 
@@ -106,16 +104,6 @@ export const EditEquipmentForm = ({ equipment, onClose }: EditEquipmentFormProps
               <SelectItem value="other">Autre</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="ip">Adresse IP</Label>
-          <Input
-            id="ip"
-            value={ipAddress}
-            onChange={(e) => setIpAddress(e.target.value)}
-            placeholder="Entrez l'adresse IP"
-          />
         </div>
 
         <div className="flex justify-end gap-4 pt-4">

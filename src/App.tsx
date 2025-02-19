@@ -8,6 +8,7 @@ import Layout from "./components/Layout";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Sites from "./pages/Sites";
+import DetectedSites from "./pages/DetectedSites";
 import Equipment from "./pages/Equipment";
 import SiteEquipment from "./pages/SiteEquipment";
 import EquipmentDetail from "./pages/EquipmentDetail";
@@ -48,6 +49,7 @@ const App = () => (
           }>
             <Route path="dashboard" element={<Index />} />
             <Route path="sites" element={<Sites />} />
+            <Route path="sites/detected" element={<DetectedSites />} />
             <Route path="sites/:siteId/equipment" element={<SiteEquipment />} />
             <Route path="equipements" element={<Equipment />} />
             <Route path="equipements/:id" element={<EquipmentDetail />} />

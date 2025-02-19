@@ -1,7 +1,7 @@
 
 import { Outlet } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import Sidebar from "./Sidebar";
+import { Sidebar } from "./Sidebar";
 import { LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -33,7 +33,7 @@ const Layout = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <Sidebar />
+      <Sidebar isCollapsed={true} onCollapse={() => {}} />
       <div className="flex-1 flex flex-col min-h-screen overflow-auto">
         <header className="bg-white shadow-sm border-b sticky top-0 z-10">
           <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">

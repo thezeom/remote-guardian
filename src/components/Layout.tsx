@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "./Sidebar";
@@ -8,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 const Layout = () => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -33,11 +35,14 @@ const Layout = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <Sidebar isCollapsed={true} onCollapse={() => {}} />
-      <div className="flex-1 flex flex-col min-h-screen overflow-auto">
+      <Sidebar isCollapsed={isCollapsed} onCollapse={setIsCollapsed} />
+      <div className={cn(
+        "flex-1 flex flex-col min-h-screen transition-all duration-300",
+        isCollapsed ? "ml-20" : "ml-64"
+      )}>
         <header className="bg-white shadow-sm border-b sticky top-0 z-10">
           <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+            <h1 className="text-xl font-semibold text-gray-900">Tableau de bord</h1>
             <Button
               variant="outline"
               size="sm"

@@ -9,8 +9,8 @@ RUN apk add --no-cache iputils net-tools
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install --production
+# Install dependencies with legacy peer deps to avoid conflicts
+RUN npm install --legacy-peer-deps --production
 
 # Copy source code
 COPY ./src ./src
@@ -24,3 +24,4 @@ ENV LOG_LEVEL=info
 
 # Start the agent
 CMD ["node", "src/agent/index.js"]
+

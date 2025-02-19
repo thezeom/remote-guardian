@@ -1,6 +1,4 @@
 
-version: '3.8'
-
 services:
   agent:
     build:
@@ -13,3 +11,4 @@ services:
     environment:
       - SITE_ID=${SITE_ID:-default}
       - API_URL=${API_URL:-https://api.example.com}
+

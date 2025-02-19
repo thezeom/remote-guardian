@@ -36,14 +36,34 @@ const Auth = () => {
           email,
           password,
         });
-        if (error) throw error;
+        
+        if (error) {
+          // Gestion spécifique de l'erreur "email non confirmé"
+          if (error.message.includes("Email not confirmed")) {
+            toast({
+              title: "Email non confirmé",
+              description: "Veuillez vérifier votre boîte mail et confirmer votre email avant de vous connecter.",
+              variant: "destructive",
+            });
+            return;
+          }
+          throw error;
+        }
+        
         navigate("/dashboard");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur d'authentification:", error);
+      
+      // Messages d'erreur plus spécifiques
+      let errorMessage = "Une erreur est survenue. Veuillez réessayer.";
+      if (error.message.includes("Invalid login credentials")) {
+        errorMessage = "Email ou mot de passe incorrect.";
+      }
+      
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue. Veuillez réessayer.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

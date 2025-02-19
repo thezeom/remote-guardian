@@ -1,8 +1,6 @@
-
 import { useParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -10,7 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { getEquipmentBySite } from "@/lib/api";
 import { Equipment } from "@/types/database";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Search, Filter, ServerIcon, CameraIcon, NetworkIcon, VideoIcon, WifiIcon, RouterIcon, MonitorIcon, Plus } from "lucide-react";
+import { ArrowLeft, Search, Filter, ServerIcon, CameraIcon, NetworkIcon, VideoIcon, WifiIcon, RouterIcon, MonitorIcon } from "lucide-react";
+import { AddEquipmentDialog } from "@/components/equipment/AddEquipmentDialog";
 
 const SiteEquipment = () => {
   const { siteId } = useParams();
@@ -72,10 +71,7 @@ const SiteEquipment = () => {
             </p>
           </div>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Ajouter un équipement
-        </Button>
+        {siteId && <AddEquipmentDialog siteId={siteId} />}
       </div>
 
       <div className="flex items-center gap-4">

@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,8 +19,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
 
 const Sites = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isNewSiteDialogOpen, setIsNewSiteDialogOpen] = useState(false);
@@ -150,54 +151,13 @@ const Sites = () => {
             Gestion et surveillance des sites
           </p>
         </div>
-        <Dialog open={isNewSiteDialogOpen} onOpenChange={setIsNewSiteDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-[#0e3175] hover:bg-[#0e3175]/90">
-              <PlusCircle className="w-4 h-4 mr-2" />
-              Nouveau site
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Ajouter un nouveau site</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleCreateSite} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nom du site</Label>
-                <Input
-                  id="name"
-                  value={newSiteName}
-                  onChange={(e) => setNewSiteName(e.target.value)}
-                  placeholder="Entrez le nom du site"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="address">Adresse</Label>
-                <Input
-                  id="address"
-                  value={newSiteAddress}
-                  onChange={(e) => setNewSiteAddress(e.target.value)}
-                  placeholder="Entrez l'adresse du site"
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsNewSiteDialogOpen(false)}
-                >
-                  Annuler
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={createSiteMutation.isPending}
-                >
-                  {createSiteMutation.isPending ? "Création..." : "Créer"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button 
+          className="bg-[#0e3175] hover:bg-[#0e3175]/90"
+          onClick={() => navigate('/sites/detected')}
+        >
+          <PlusCircle className="w-4 h-4 mr-2" />
+          Nouveau site
+        </Button>
       </div>
 
       <div className="flex items-center gap-4">

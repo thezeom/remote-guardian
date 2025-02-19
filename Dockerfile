@@ -3,9 +3,17 @@
 FROM node:20-alpine as build
 
 WORKDIR /app
+
+# Copier les fichiers de dépendances
 COPY package*.json ./
+
+# Installer les dépendances
 RUN npm install --legacy-peer-deps
+
+# Copier les sources
 COPY . .
+
+# Build
 RUN npm run build
 
 # Production stage

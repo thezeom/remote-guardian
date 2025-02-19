@@ -1,69 +1,155 @@
-# Welcome to your Lovable project
 
-## Project info
+# Documentation de l'API Frontend
 
-**URL**: https://lovable.dev/projects/462a6288-e204-4bec-9016-8ba34db97326
+## Introduction
 
-## How can I edit this code?
+Cette documentation détaille les endpoints API nécessaires pour le développement du backend de l'application de surveillance réseau. L'application permet de gérer des sites, des équipements réseau et des alertes.
 
-There are several ways of editing your application.
+## Structure des données
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/462a6288-e204-4bec-9016-8ba34db97326) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### Sites
+```typescript
+interface Site {
+  id: string;
+  name: string;
+  address: string;
+  city?: string;
+  postal_code?: string;
+  status: 'online' | 'offline' | 'warning' | 'pending';
+  created_at: string;
+  updated_at: string;
+}
 ```
 
-**Edit a file directly in GitHub**
+### Équipements
+```typescript
+interface Equipment {
+  id: string;
+  site_id: string;
+  name: string;
+  type: 'camera' | 'video-recorder' | 'switch' | 'server' | 'access_point' | 'router' | 'other';
+  status: 'online' | 'offline' | 'maintenance';
+  ip_address: string | null;
+  last_maintenance: string | null;
+  created_at: string;
+  updated_at: string;
+}
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Alertes
+```typescript
+interface Alert {
+  id: string;
+  equipment_id: string;
+  type: 'error' | 'warning' | 'info';
+  title: string;
+  message: string;
+  description?: string;
+  status: 'active' | 'resolved' | 'acknowledged';
+  created_at: string;
+  resolved_at: string | null;
+  updated_at?: string;
+}
+```
 
-**Use GitHub Codespaces**
+## Endpoints API requis
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Sites
 
-## What technologies are used for this project?
+- `GET /api/sites` - Liste tous les sites
+- `GET /api/sites/:id` - Récupère un site spécifique
+- `POST /api/sites` - Crée un nouveau site
+- `PUT /api/sites/:id` - Met à jour un site
+- `DELETE /api/sites/:id` - Supprime un site
+- `GET /api/sites/:id/stats` - Récupère les statistiques d'un site
 
-This project is built with .
+### Équipements
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- `GET /api/equipment` - Liste tous les équipements
+- `GET /api/sites/:siteId/equipment` - Liste les équipements d'un site
+- `POST /api/equipment` - Crée un nouvel équipement
+- `PUT /api/equipment/:id` - Met à jour un équipement
+- `DELETE /api/equipment/:id` - Supprime un équipement
 
-## How can I deploy this project?
+### Alertes
 
-Simply open [Lovable](https://lovable.dev/projects/462a6288-e204-4bec-9016-8ba34db97326) and click on Share -> Publish.
+- `GET /api/alerts` - Liste toutes les alertes
+- `GET /api/equipment/:equipmentId/alerts` - Liste les alertes d'un équipement
+- `POST /api/alerts` - Crée une nouvelle alerte
+- `PUT /api/alerts/:id` - Met à jour une alerte
 
-## I want to use a custom domain - is that possible?
+### Agents
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+- `POST /api/agents` - Enregistre un nouvel agent
+- `POST /api/agents/:agentId/data` - Envoie des données depuis l'agent
+
+## Format des réponses
+
+Toutes les réponses doivent suivre ce format :
+
+```json
+{
+  "data": {}, // Données de la réponse
+  "error": null // Message d'erreur si applicable
+}
+```
+
+## Gestion des erreurs
+
+Les erreurs doivent retourner un statut HTTP approprié et un message d'erreur :
+
+```json
+{
+  "data": null,
+  "error": {
+    "message": "Description de l'erreur",
+    "code": "ERROR_CODE"
+  }
+}
+```
+
+## Authentification
+
+L'API utilise l'authentification Bearer Token. Chaque requête doit inclure un header :
+```
+Authorization: Bearer <token>
+```
+
+## Exemples de requêtes
+
+### Création d'un site
+```bash
+POST /api/sites
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "name": "Site Paris",
+  "address": "123 rue de Paris",
+  "city": "Paris",
+  "postal_code": "75001"
+}
+```
+
+### Mise à jour d'un équipement
+```bash
+PUT /api/equipment/123
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "status": "maintenance",
+  "last_maintenance": "2024-03-14T12:00:00Z"
+}
+```
+
+## Notes pour le développement
+
+1. Tous les timestamps doivent être en UTC et au format ISO 8601
+2. Les IDs doivent être des UUIDs
+3. Implémenter la pagination pour les endpoints de liste
+4. Supporter le filtrage et le tri des résultats
+5. Mettre en place des logs détaillés pour le debugging
+6. Implémenter des mécanismes de rate limiting
+7. Supporter CORS pour le développement local
+

@@ -1,308 +1,258 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { Site, Equipment, Alert } from "@/types/database";
+/**
+ * API Client pour l'application de surveillance réseau
+ * 
+ * Cette classe gère toutes les interactions avec le backend.
+ * Chaque méthode correspond à un endpoint API spécifique.
+ * Les types de données sont définis dans src/types/database.ts
+ */
 
-// Sites
-export const getSites = async () => {
-  const { data, error } = await supabase
-    .from('sites')
-    .select('*')
-    .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data as Site[];
-};
+import type { Site, Equipment, Alert } from "@/types/database";
 
-export const getSiteById = async (id: string) => {
-  const { data, error } = await supabase
-    .from('sites')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) throw error;
-  return data as Site;
-};
+/**
+ * Base URL de l'API. À configurer selon l'environnement.
+ */
+const API_URL = process.env.API_URL || "http://localhost:3000/api";
 
-export const createSite = async (site: Omit<Site, 'id' | 'created_at' | 'updated_at'>) => {
-  const { data, error } = await supabase
-    .from('sites')
-    .insert([site])
-    .select()
-    .single();
-  
-  if (error) throw error;
-  return data as Site;
-};
+/**
+ * Classe principale pour les appels API
+ */
+export class ApiClient {
+  private baseUrl: string;
+  private token: string | null;
 
-export const updateSite = async (id: string, site: Partial<Site>) => {
-  const { data, error } = await supabase
-    .from('sites')
-    .update(site)
-    .eq('id', id)
-    .select()
-    .single();
-  
-  if (error) throw error;
-  return data as Site;
-};
-
-export const deleteSite = async (id: string) => {
-  const { error } = await supabase
-    .from('sites')
-    .delete()
-    .eq('id', id);
-  
-  if (error) throw error;
-};
-
-export const getSiteStats = async (siteId: string) => {
-  try {
-    // Pour les équipements
-    const { data: equipmentData, error: equipmentError } = await supabase
-      .from('equipment')
-      .select('status')
-      .eq('site_id', siteId);
-
-    if (equipmentError) throw equipmentError;
-
-    // Pour les alertes
-    const { data: alertData, error: alertError } = await supabase
-      .from('alerts')
-      .select('type, status')
-      .eq('equipment.site_id', siteId);
-
-    if (alertError) throw alertError;
-
-    // Transformer les données d'équipement
-    const equipmentStats = equipmentData.reduce((acc: { [key: string]: number }, item) => {
-      const status = item.status || 'unknown';
-      acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    }, {});
-
-    // Transformer les données d'alerte
-    const alertStats = alertData.reduce((acc: { [key: string]: { [key: string]: number } }, item) => {
-      const type = item.type || 'unknown';
-      const status = item.status || 'unknown';
-      
-      if (!acc[type]) {
-        acc[type] = {};
-      }
-      
-      acc[type][status] = (acc[type][status] || 0) + 1;
-      return acc;
-    }, {});
-
-    return {
-      equipment: equipmentStats,
-      alerts: alertStats
-    };
-  } catch (error) {
-    console.error('Error in getSiteStats:', error);
-    throw error;
+  constructor(baseUrl: string = API_URL) {
+    this.baseUrl = baseUrl;
+    this.token = null;
   }
-};
 
-// Equipment
-export const getEquipment = async () => {
-  const { data, error } = await supabase
-    .from('equipment')
-    .select('*')
-    .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data as Equipment[];
-};
+  /**
+   * Configure le token d'authentification pour les requêtes
+   */
+  setAuthToken(token: string) {
+    this.token = token;
+  }
 
-export const getEquipmentByType = async (type: Equipment['type']) => {
-  const { data, error } = await supabase
-    .from('equipment')
-    .select('*')
-    .eq('type', type)
-    .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data as Equipment[];
-};
+  /**
+   * Headers par défaut pour toutes les requêtes
+   */
+  private get headers() {
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+    
+    if (this.token) {
+      headers["Authorization"] = `Bearer ${this.token}`;
+    }
+    
+    return headers;
+  }
 
-export const getEquipmentByStatus = async (status: Equipment['status']) => {
-  const { data, error } = await supabase
-    .from('equipment')
-    .select('*')
-    .eq('status', status)
-    .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data as Equipment[];
-};
+  /**
+   * Méthode générique pour les appels API
+   */
+  private async fetch<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      ...options,
+      headers: this.headers,
+    });
 
-export const getEquipmentBySite = async (siteId: string) => {
-  const { data, error } = await supabase
-    .from('equipment')
-    .select('*')
-    .eq('site_id', siteId)
-    .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data as Equipment[];
-};
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.statusText}`);
+    }
 
-export const getEquipmentById = async (id: string) => {
-  const { data, error } = await supabase
-    .from('equipment')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) throw error;
-  return data as Equipment;
-};
+    return response.json();
+  }
 
-export const createEquipment = async (equipment: Omit<Equipment, 'id' | 'created_at' | 'updated_at'>) => {
-  const { data, error } = await supabase
-    .from('equipment')
-    .insert([equipment])
-    .select()
-    .single();
-  
-  if (error) throw error;
-  return data as Equipment;
-};
+  // Sites API
+  /**
+   * Récupère la liste des sites
+   * GET /api/sites
+   */
+  async getSites(): Promise<Site[]> {
+    return this.fetch<Site[]>("/sites");
+  }
 
-export const updateEquipment = async (id: string, equipment: Partial<Equipment>) => {
-  const { data, error } = await supabase
-    .from('equipment')
-    .update(equipment)
-    .eq('id', id)
-    .select()
-    .single();
-  
-  if (error) throw error;
-  return data as Equipment;
-};
+  /**
+   * Récupère un site par son ID
+   * GET /api/sites/:id
+   */
+  async getSiteById(id: string): Promise<Site> {
+    return this.fetch<Site>(`/sites/${id}`);
+  }
 
-export const deleteEquipment = async (id: string) => {
-  const { error } = await supabase
-    .from('equipment')
-    .delete()
-    .eq('id', id);
-  
-  if (error) throw error;
-};
+  /**
+   * Crée un nouveau site
+   * POST /api/sites
+   */
+  async createSite(site: Omit<Site, "id" | "created_at" | "updated_at">): Promise<Site> {
+    return this.fetch<Site>("/sites", {
+      method: "POST",
+      body: JSON.stringify(site),
+    });
+  }
 
-export const bulkUpdateEquipment = async (ids: string[], updates: Partial<Equipment>) => {
-  const { error } = await supabase
-    .from('equipment')
-    .update(updates)
-    .in('id', ids);
-  
-  if (error) throw error;
-};
+  /**
+   * Met à jour un site
+   * PUT /api/sites/:id
+   */
+  async updateSite(id: string, site: Partial<Site>): Promise<Site> {
+    return this.fetch<Site>(`/sites/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(site),
+    });
+  }
 
-// Alerts
-export const getAlerts = async () => {
-  const { data, error } = await supabase
-    .from('alerts')
-    .select('*')
-    .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data as Alert[];
-};
+  /**
+   * Supprime un site
+   * DELETE /api/sites/:id
+   */
+  async deleteSite(id: string): Promise<void> {
+    await this.fetch(`/sites/${id}`, {
+      method: "DELETE",
+    });
+  }
 
-export const getActiveAlerts = async () => {
-  const { data, error } = await supabase
-    .from('alerts')
-    .select('*')
-    .eq('status', 'active')
-    .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data as Alert[];
-};
+  // Equipment API
+  /**
+   * Récupère la liste des équipements
+   * GET /api/equipment
+   */
+  async getEquipment(): Promise<Equipment[]> {
+    return this.fetch<Equipment[]>("/equipment");
+  }
 
-export const getAlertsByType = async (type: Alert['type']) => {
-  const { data, error } = await supabase
-    .from('alerts')
-    .select('*')
-    .eq('type', type)
-    .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data as Alert[];
-};
+  /**
+   * Récupère les équipements d'un site
+   * GET /api/sites/:siteId/equipment
+   */
+  async getEquipmentBySite(siteId: string): Promise<Equipment[]> {
+    return this.fetch<Equipment[]>(`/sites/${siteId}/equipment`);
+  }
 
-export const getAlertsByStatus = async (status: Alert['status']) => {
-  const { data, error } = await supabase
-    .from('alerts')
-    .select('*')
-    .eq('status', status)
-    .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data as Alert[];
-};
+  /**
+   * Crée un nouvel équipement
+   * POST /api/equipment
+   */
+  async createEquipment(
+    equipment: Omit<Equipment, "id" | "created_at" | "updated_at">
+  ): Promise<Equipment> {
+    return this.fetch<Equipment>("/equipment", {
+      method: "POST",
+      body: JSON.stringify(equipment),
+    });
+  }
 
-export const getAlertsByEquipment = async (equipmentId: string) => {
-  const { data, error } = await supabase
-    .from('alerts')
-    .select('*')
-    .eq('equipment_id', equipmentId)
-    .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data as Alert[];
-};
+  /**
+   * Met à jour un équipement
+   * PUT /api/equipment/:id
+   */
+  async updateEquipment(
+    id: string,
+    equipment: Partial<Equipment>
+  ): Promise<Equipment> {
+    return this.fetch<Equipment>(`/equipment/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(equipment),
+    });
+  }
 
-export const getAlertsBySite = async (siteId: string) => {
-  const { data, error } = await supabase
-    .from('alerts')
-    .select('*')
-    .eq('equipment.site_id', siteId)
-    .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data as Alert[];
-};
+  /**
+   * Supprime un équipement
+   * DELETE /api/equipment/:id
+   */
+  async deleteEquipment(id: string): Promise<void> {
+    await this.fetch(`/equipment/${id}`, {
+      method: "DELETE",
+    });
+  }
 
-export const createAlert = async (alert: Omit<Alert, 'id' | 'created_at' | 'updated_at'>) => {
-  const { data, error } = await supabase
-    .from('alerts')
-    .insert([alert])
-    .select()
-    .single();
-  
-  if (error) throw error;
-  return data as Alert;
-};
+  // Alerts API
+  /**
+   * Récupère la liste des alertes
+   * GET /api/alerts
+   */
+  async getAlerts(): Promise<Alert[]> {
+    return this.fetch<Alert[]>("/alerts");
+  }
 
-export const updateAlert = async (id: string, alert: Partial<Alert>) => {
-  const { data, error } = await supabase
-    .from('alerts')
-    .update(alert)
-    .eq('id', id)
-    .select()
-    .single();
-  
-  if (error) throw error;
-  return data as Alert;
-};
+  /**
+   * Récupère les alertes d'un équipement
+   * GET /api/equipment/:equipmentId/alerts
+   */
+  async getAlertsByEquipment(equipmentId: string): Promise<Alert[]> {
+    return this.fetch<Alert[]>(`/equipment/${equipmentId}/alerts`);
+  }
 
-export const deleteAlert = async (id: string) => {
-  const { error } = await supabase
-    .from('alerts')
-    .delete()
-    .eq('id', id);
-  
-  if (error) throw error;
-};
+  /**
+   * Crée une nouvelle alerte
+   * POST /api/alerts
+   */
+  async createAlert(
+    alert: Omit<Alert, "id" | "created_at" | "updated_at">
+  ): Promise<Alert> {
+    return this.fetch<Alert>("/alerts", {
+      method: "POST",
+      body: JSON.stringify(alert),
+    });
+  }
 
-export const bulkUpdateAlerts = async (ids: string[], updates: Partial<Alert>) => {
-  const { error } = await supabase
-    .from('alerts')
-    .update(updates)
-    .in('id', ids);
-  
-  if (error) throw error;
-};
+  /**
+   * Met à jour une alerte
+   * PUT /api/alerts/:id
+   */
+  async updateAlert(id: string, alert: Partial<Alert>): Promise<Alert> {
+    return this.fetch<Alert>(`/alerts/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(alert),
+    });
+  }
+
+  /**
+   * Récupère les statistiques d'un site
+   * GET /api/sites/:siteId/stats
+   */
+  async getSiteStats(siteId: string): Promise<{
+    equipment: { [key: string]: number };
+    alerts: { [key: string]: { [key: string]: number } };
+  }> {
+    return this.fetch(`/sites/${siteId}/stats`);
+  }
+
+  // Agent API
+  /**
+   * Enregistre un nouvel agent
+   * POST /api/agents
+   */
+  async registerAgent(siteId: string, agentInfo: {
+    name: string;
+    version: string;
+    os: string;
+  }): Promise<{ token: string }> {
+    return this.fetch("/agents", {
+      method: "POST",
+      body: JSON.stringify({ siteId, ...agentInfo }),
+    });
+  }
+
+  /**
+   * Envoie des données de l'agent au serveur
+   * POST /api/agents/:agentId/data
+   */
+  async sendAgentData(agentId: string, data: {
+    metrics: any;
+    devices: any[];
+    timestamp: string;
+  }): Promise<void> {
+    await this.fetch(`/agents/${agentId}/data`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+}
+
+// Export une instance par défaut
+export const api = new ApiClient();

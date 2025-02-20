@@ -1,3 +1,4 @@
+
 import { useParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,8 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import { getEquipmentBySite } from "@/lib/api";
 import { Equipment } from "@/types/database";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Search, Filter, ServerIcon, CameraIcon, NetworkIcon, VideoIcon, WifiIcon, RouterIcon, MonitorIcon } from "lucide-react";
+import { ArrowLeft, Search, Filter } from "lucide-react";
 import { AddEquipmentDialog } from "@/components/equipment/AddEquipmentDialog";
+import { EquipmentIcon } from "@/components/equipment/EquipmentIcon";
 
 const SiteEquipment = () => {
   const { siteId } = useParams();
@@ -30,27 +32,6 @@ const SiteEquipment = () => {
       description: "Impossible de charger les équipements"
     });
   }
-
-  const getIcon = (type: string) => {
-    switch(type) {
-      case 'camera':
-        return <CameraIcon className="w-5 h-5" />;
-      case 'video-recorder':
-        return <VideoIcon className="w-5 h-5" />;
-      case 'switch':
-        return <NetworkIcon className="w-5 h-5" />;
-      case 'server':
-        return <ServerIcon className="w-5 h-5" />;
-      case 'access_point':
-        return <WifiIcon className="w-5 h-5" />;
-      case 'router':
-        return <RouterIcon className="w-5 h-5" />;
-      case 'pc':
-        return <MonitorIcon className="w-5 h-5" />;
-      default:
-        return <ServerIcon className="w-5 h-5" />;
-    }
-  };
 
   const filteredEquipment = equipment?.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -130,7 +111,7 @@ const SiteEquipment = () => {
               <Card className="p-4 hover:shadow-lg transition-all">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    {getIcon(item.type)}
+                    <EquipmentIcon type={item.type} />
                     <div>
                       <h3 className="font-medium">{item.name}</h3>
                       <p className="text-sm text-muted-foreground">{item.ip_address || 'Pas d\'IP'}</p>

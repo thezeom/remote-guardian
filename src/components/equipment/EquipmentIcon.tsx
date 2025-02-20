@@ -1,5 +1,5 @@
 
-import { CameraIcon, VideoIcon, NetworkIcon, ServerIcon, WifiIcon, RouterIcon, MonitorIcon, QuestionMarkIcon } from "lucide-react";
+import { CameraIcon, VideoIcon, NetworkIcon, ServerIcon, WifiIcon, RouterIcon, MonitorIcon, HelpCircleIcon } from "lucide-react";
 
 type EquipmentType = 'camera' | 'video-recorder' | 'switch' | 'server' | 'access_point' | 'router' | 'pc' | 'other';
 
@@ -26,6 +26,6 @@ export const EquipmentIcon = ({ type, className = "w-5 h-5" }: EquipmentIconProp
       return <MonitorIcon className={className} />;
     case 'other':
     default:
-      return <QuestionMarkIcon className={className} />;
+      return <HelpCircleIcon className={className} />;
   }
 };

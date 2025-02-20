@@ -1,7 +1,7 @@
 
-import { CameraIcon, VideoIcon, NetworkIcon, ServerIcon, WifiIcon, RouterIcon, MonitorIcon } from "lucide-react";
+import { CameraIcon, VideoIcon, NetworkIcon, ServerIcon, WifiIcon, RouterIcon, MonitorIcon, QuestionMarkIcon } from "lucide-react";
 
-type EquipmentType = 'camera' | 'video-recorder' | 'switch' | 'server' | 'antenna' | 'router' | 'pc';
+type EquipmentType = 'camera' | 'video-recorder' | 'switch' | 'server' | 'access_point' | 'router' | 'pc' | 'other';
 
 interface EquipmentIconProps {
   type: EquipmentType | string;
@@ -18,13 +18,14 @@ export const EquipmentIcon = ({ type, className = "w-5 h-5" }: EquipmentIconProp
       return <NetworkIcon className={className} />;
     case 'server':
       return <ServerIcon className={className} />;
-    case 'antenna':
+    case 'access_point':
       return <WifiIcon className={className} />;
     case 'router':
       return <RouterIcon className={className} />;
     case 'pc':
       return <MonitorIcon className={className} />;
+    case 'other':
     default:
-      return <ServerIcon className={className} />;
+      return <QuestionMarkIcon className={className} />;
   }
 };

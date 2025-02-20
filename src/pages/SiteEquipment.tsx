@@ -45,6 +45,8 @@ const SiteEquipment = () => {
         return <WifiIcon className="w-5 h-5" />;
       case 'router':
         return <RouterIcon className="w-5 h-5" />;
+      case 'pc':
+        return <MonitorIcon className="w-5 h-5" />;
       default:
         return <ServerIcon className="w-5 h-5" />;
     }
@@ -98,6 +100,7 @@ const SiteEquipment = () => {
               <SelectItem value="server">Serveurs</SelectItem>
               <SelectItem value="access_point">Points d'accès WiFi</SelectItem>
               <SelectItem value="router">Routeurs</SelectItem>
+              <SelectItem value="pc">PCs</SelectItem>
               <SelectItem value="other">Autres</SelectItem>
             </SelectContent>
           </Select>

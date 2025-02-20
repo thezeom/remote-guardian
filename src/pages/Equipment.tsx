@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -95,6 +96,42 @@ const Equipment = () => {
       status: "online" as const,
       ip: "192.168.1.106",
       lastMaintenance: "2024-02-22"
+    },
+    {
+      id: 7,
+      name: "Point d'accès AP-01",
+      type: "access_point",
+      site: "Paris Centre",
+      status: "online" as const,
+      ip: "192.168.1.107",
+      lastMaintenance: "2024-02-23"
+    },
+    {
+      id: 8,
+      name: "NVR-01",
+      type: "video-recorder",
+      site: "Lyon Sud",
+      status: "online" as const,
+      ip: "192.168.1.108",
+      lastMaintenance: "2024-02-24"
+    },
+    {
+      id: 9,
+      name: "PC-01",
+      type: "pc",
+      site: "Marseille Port",
+      status: "warning" as const,
+      ip: "192.168.1.109",
+      lastMaintenance: "2024-02-26"
+    },
+    {
+      id: 10,
+      name: "Device-01",
+      type: "other",
+      site: "Bordeaux Nord",
+      status: "online" as const,
+      ip: "192.168.1.110",
+      lastMaintenance: "2024-02-27"
     }
   ];
 
